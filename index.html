@@ -605,6 +605,52 @@
       white-space: pre-line;
     }
 
+    .chapter-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .chapter-label {
+      color: #6a6258;
+      font-size: .9rem;
+      font-weight: 900;
+    }
+
+    .chapter-select {
+      max-width: 100%;
+      border: 0;
+      border-radius: 14px;
+      padding: 11px 12px;
+      background: #171717;
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .chapter-title {
+      font-family: Playfair Display, serif;
+      font-size: clamp(2rem, 8vw, 3.4rem);
+      line-height: .92;
+      letter-spacing: -.05em;
+      margin-bottom: 18px;
+      color: #171717;
+    }
+
+    .reader.dark .chapter-title,
+    .reader.dark .chapter-label,
+    .reader.dark .page-nav span,
+    .reader.dark .reader-sinopse {
+      color: #d9d9e8;
+    }
+
+    .reader.dark .kindle-page {
+      background: rgba(255,255,255,.06);
+      border-color: rgba(255,255,255,.1);
+    }
+
     .page-nav {
       display: flex;
       justify-content: space-between;
@@ -774,7 +820,8 @@
       <textarea id="sinopse" placeholder="Escreva uma sinopse curta"></textarea>
 
       <label id="textoLabel">Texto</label>
-      <textarea id="texto" spellcheck="true" placeholder="Cole o texto inteiro aqui. O navegador pode sublinhar erros de escrita."></textarea>
+      <textarea id="texto" spellcheck="true" placeholder="Cole o texto inteiro aqui. Para separar capítulos, use linhas começando com ##, exemplo: ## Capítulo 1 — O Som da Noite"></textarea>
+      <div class="hint" id="hintCapitulos">Separador recomendado: escreva cada capítulo começando com ##. Exemplo: ## Capítulo 1 — O Som da Noite</div>
 
       <div id="paginasBox" class="hide">
         <label>Páginas do gibi</label>
@@ -812,8 +859,11 @@
   let filtro = 'todos';
   let fonteSize = 1.28;
   let leitorEscuro = false;
+  let capitulosTexto = [];
+  let capituloAtual = 0;
   let paginasTexto = [];
   let paginaAtual = 0;
+  let fonteAtual = 'Literata';
 
   const auth = document.getElementById('auth');
   const home = document.getElementById('home');
@@ -938,9 +988,11 @@
 
     if (livro.tipo === 'conto') {
       area.className = '';
-      paginasTexto = criarPaginas(livro.texto || '', 230);
+      fonteAtual = livro.fonte || 'Literata';
+      capitulosTexto = separarCapitulos(livro.texto || '');
+      capituloAtual = 0;
       paginaAtual = 0;
-      area.style.fontFamily = livro.fonte || 'Literata';
+      prepararPaginasDoCapitulo();
       mostrarPagina();
     } else {
       area.className = 'comic';
@@ -951,19 +1003,73 @@
     window.scrollTo(0,0);
   }
 
+  function escaparHTML(valor) {
+    return String(valor || '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  function ehTituloCapitulo(linha) {
+    const limpa = linha.trim();
+    return /^#{1,3}\s+/.test(limpa) || /^cap[ií]tulo\s+\d+/i.test(limpa);
+  }
+
+  function limparTituloCapitulo(linha) {
+    return linha.trim().replace(/^#{1,3}\s+/, '').trim();
+  }
+
+  function separarCapitulos(texto) {
+    const linhas = (texto || '').replace(/\r\n/g, '\n').split('\n');
+    const capitulos = [];
+    let tituloAtual = 'Texto completo';
+    let corpoAtual = [];
+    let encontrouCapitulo = false;
+
+    linhas.forEach((linha) => {
+      if (ehTituloCapitulo(linha)) {
+        if (corpoAtual.join('\n').trim() || encontrouCapitulo) {
+          capitulos.push({
+            titulo: tituloAtual,
+            texto: corpoAtual.join('\n').trim()
+          });
+        }
+
+        tituloAtual = limparTituloCapitulo(linha);
+        corpoAtual = [];
+        encontrouCapitulo = true;
+      } else {
+        corpoAtual.push(linha);
+      }
+    });
+
+    if (corpoAtual.join('\n').trim() || !capitulos.length) {
+      capitulos.push({
+        titulo: tituloAtual,
+        texto: corpoAtual.join('\n').trim()
+      });
+    }
+
+    return capitulos.filter(c => c.titulo || c.texto);
+  }
+
   function criarPaginas(texto, palavrasPorPagina) {
-    const paragrafos = texto.split('\n').map(p => p.trim()).filter(Boolean);
+    const paragrafos = (texto || '').split('\n').map(p => p.trim()).filter(Boolean);
     const paginas = [];
     let atual = '';
     let contagem = 0;
 
     paragrafos.forEach(paragrafo => {
-      const palavras = paragrafo.split(/\s+/).length;
+      const palavras = paragrafo.split(/\s+/).filter(Boolean).length;
+
       if (contagem + palavras > palavrasPorPagina && atual.trim()) {
         paginas.push(atual.trim());
         atual = '';
         contagem = 0;
       }
+
       atual += paragrafo + '\n\n';
       contagem += palavras;
     });
@@ -972,25 +1078,93 @@
     return paginas.length ? paginas : [''];
   }
 
+  function prepararPaginasDoCapitulo() {
+    const capitulo = capitulosTexto[capituloAtual] || { texto: '' };
+    paginasTexto = criarPaginas(capitulo.texto || '', 230);
+    if (paginaAtual > paginasTexto.length - 1) paginaAtual = paginasTexto.length - 1;
+    if (paginaAtual < 0) paginaAtual = 0;
+  }
+
+  function irParaCapitulo(index) {
+    capituloAtual = Number(index);
+    paginaAtual = 0;
+    prepararPaginasDoCapitulo();
+    mostrarPagina();
+    window.scrollTo(0, 0);
+  }
+
+  function capituloAnterior() {
+    if (capituloAtual > 0) {
+      capituloAtual--;
+      paginaAtual = 0;
+      prepararPaginasDoCapitulo();
+      mostrarPagina();
+      window.scrollTo(0, 0);
+    }
+  }
+
+  function proximoCapitulo() {
+    if (capituloAtual < capitulosTexto.length - 1) {
+      capituloAtual++;
+      paginaAtual = 0;
+      prepararPaginasDoCapitulo();
+      mostrarPagina();
+      window.scrollTo(0, 0);
+    }
+  }
+
   function mostrarPagina() {
     const area = document.getElementById('readerConteudo');
+    const capitulo = capitulosTexto[capituloAtual] || { titulo: 'Texto', texto: '' };
+    const opcoes = capitulosTexto.map((cap, i) => `
+      <option value="${i}" ${i === capituloAtual ? 'selected' : ''}>${escaparHTML(cap.titulo || 'Capítulo ' + (i + 1))}</option>
+    `).join('');
+
     area.innerHTML = `
-      <div class="kindle-page" style="font-size:${fonteSize}rem;">${paginasTexto[paginaAtual] || ''}</div>
+      <div class="chapter-top">
+        <div class="chapter-label">Capítulo ${capituloAtual + 1} de ${capitulosTexto.length}</div>
+        <select class="chapter-select" onchange="irParaCapitulo(this.value)">${opcoes}</select>
+      </div>
+
+      <h2 class="chapter-title">${escaparHTML(capitulo.titulo || 'Capítulo ' + (capituloAtual + 1))}</h2>
+
+      <div class="kindle-page" style="font-size:${fonteSize}rem; font-family:${fonteAtual};">${escaparHTML(paginasTexto[paginaAtual] || '')}</div>
+
       <div class="page-nav">
         <button onclick="paginaAnterior()">Anterior</button>
         <span>Página ${paginaAtual + 1} de ${paginasTexto.length}</span>
         <button onclick="proximaPagina()">Próxima</button>
+      </div>
+
+      <div class="page-nav">
+        <button onclick="capituloAnterior()">Capítulo anterior</button>
+        <span>${escaparHTML(capitulo.titulo || '')}</span>
+        <button onclick="proximoCapitulo()">Próximo capítulo</button>
       </div>`;
   }
 
   function paginaAnterior() {
-    if (paginaAtual > 0) paginaAtual--;
+    if (paginaAtual > 0) {
+      paginaAtual--;
+    } else if (capituloAtual > 0) {
+      capituloAtual--;
+      prepararPaginasDoCapitulo();
+      paginaAtual = paginasTexto.length - 1;
+    }
+
     mostrarPagina();
     window.scrollTo(0, 0);
   }
 
   function proximaPagina() {
-    if (paginaAtual < paginasTexto.length - 1) paginaAtual++;
+    if (paginaAtual < paginasTexto.length - 1) {
+      paginaAtual++;
+    } else if (capituloAtual < capitulosTexto.length - 1) {
+      capituloAtual++;
+      paginaAtual = 0;
+      prepararPaginasDoCapitulo();
+    }
+
     mostrarPagina();
     window.scrollTo(0, 0);
   }
@@ -1008,6 +1182,7 @@
     const tipo = document.getElementById('tipo').value;
     document.getElementById('texto').classList.toggle('hide', tipo === 'gibi');
     document.getElementById('textoLabel').classList.toggle('hide', tipo === 'gibi');
+    document.getElementById('hintCapitulos').classList.toggle('hide', tipo === 'gibi');
     document.getElementById('paginasBox').classList.toggle('hide', tipo !== 'gibi');
   }
 
@@ -1099,6 +1274,7 @@
   }
 
   function mudarFonte(nome) {
+    fonteAtual = nome;
     const page = document.querySelector('.kindle-page');
     if (page) page.style.fontFamily = nome;
   }
@@ -1106,6 +1282,7 @@
   function alternarTemaLeitor() {
     leitorEscuro = !leitorEscuro;
     const reader = document.getElementById('reader');
+    reader.classList.toggle('dark', leitorEscuro);
     if (leitorEscuro) {
       reader.style.background = '#11131d';
       reader.style.color = '#f7f7fb';
@@ -1125,6 +1302,7 @@
     if (/\.\.\./.test(texto)) avisos.push('Há reticências. Veja se não está usando demais.');
     if (/\b(como se)\b/gi.test(texto)) avisos.push('Encontrei “como se”. Veja se não está repetindo demais.');
     if (/\b(parecia)\b/gi.test(texto)) avisos.push('Encontrei “parecia”. Veja se não está repetindo demais.');
+    if (!/^#{1,3}\s+|^cap[ií]tulo\s+\d+/gim.test(texto)) avisos.push('Não encontrei separador de capítulo. Use ## Capítulo 1 para a leitura ficar organizada.');
     if (texto.length < 200) avisos.push('Texto muito curto para revisão útil.');
 
     box.style.display = 'block';
