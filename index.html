@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Biblioteca Assis</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Literata:wght@400;500;600;700&family=Merriweather:wght@300;400;700&family=Playfair+Display:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #08090d;
+      --bg2: #11131d;
+      --text: #f7f7fb;
+      --muted: #a8adbd;
+      --line: rgba(255,255,255,.12);
+      --glass: rgba(255,255,255,.07);
+      --glass2: rgba(255,255,255,.11);
+      --accent: #8ee3ff;
+      --accent2: #c7a5ff;
+      --warm: #ffe0a3;
+      --danger: #ff6b7a;
+      --readerBg: #f5efe4;
+      --readerText: #171717;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(142,227,255,.18), transparent 28%),
+        radial-gradient(circle at 85% 5%, rgba(199,165,255,.18), transparent 28%),
+        linear-gradient(145deg, #08090d 0%, #11131d 48%, #07070a 100%);
+      overflow-x: hidden;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      opacity: .18;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 260 260' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+    .hide { display: none !important; }
+
+    .app {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 12px 0;
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 24px;
+      background: rgba(8,9,13,.72);
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 70px rgba(0,0,0,.34);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 17px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: grid;
+      place-items: center;
+      color: #06070b;
+      font-weight: 1000;
+      box-shadow: 0 16px 42px rgba(142,227,255,.22);
+      flex: 0 0 auto;
+    }
+
+    .brand h1 {
+      font-size: 1rem;
+      line-height: 1;
+      white-space: nowrap;
+      font-weight: 900;
+      letter-spacing: -.02em;
+    }
+
+    .brand p {
+      color: var(--muted);
+      font-size: .78rem;
+      margin-top: 5px;
+      white-space: nowrap;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 16px;
+      padding: 12px 14px;
+      font-weight: 900;
+      transition: .18s ease;
+    }
+
+    .btn:active { transform: scale(.98); }
+    .btn-main { color: #05060a; background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+    .btn-ghost { color: var(--text); background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.1); }
+    .btn-danger { color: #fff; background: rgba(255,107,122,.86); }
+
+    .hero {
+      padding: 26px 0 18px;
+    }
+
+    .hero-panel {
+      min-height: 440px;
+      border-radius: 34px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255,255,255,.14);
+      background:
+        linear-gradient(90deg, rgba(0,0,0,.72), rgba(0,0,0,.18)),
+        url('https://images.unsplash.com/photo-1519682337058-a94d519337bc?q=80&w=1600&auto=format&fit=crop') center/cover;
+      box-shadow: 0 30px 90px rgba(0,0,0,.44);
+      display: flex;
+      align-items: flex-end;
+      padding: 28px;
+    }
+
+    .hero-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 70% 20%, rgba(142,227,255,.22), transparent 32%);
+    }
+
+    .hero-content {
+      position: relative;
+      width: min(720px, 100%);
+      z-index: 2;
+    }
+
+    .kicker {
+      display: inline-flex;
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: #05060a;
+      background: linear-gradient(135deg, var(--accent), var(--warm));
+      font-weight: 1000;
+      font-size: .82rem;
+      margin-bottom: 16px;
+    }
+
+    .hero h2 {
+      font-family: Playfair Display, serif;
+      font-size: clamp(3rem, 13vw, 6.8rem);
+      line-height: .86;
+      letter-spacing: -.07em;
+      text-shadow: 0 18px 70px rgba(0,0,0,.62);
+    }
+
+    .hero p {
+      margin-top: 18px;
+      color: #dde2ef;
+      max-width: 610px;
+      line-height: 1.65;
+      font-size: 1rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      padding: 24px 0 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tabs::-webkit-scrollbar { display: none; }
+
+    .tab {
+      flex: 0 0 auto;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.07);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 13px 18px;
+      font-weight: 1000;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #05060a;
+      border-color: transparent;
+    }
+
+    .section-title {
+      margin: 18px 0 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+    }
+
+    .section-title h3 {
+      font-family: Playfair Display, serif;
+      font-size: 2.3rem;
+      line-height: .95;
+      letter-spacing: -.05em;
+    }
+
+    .section-title span {
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .carousel {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding: 4px 2px 24px;
+      scrollbar-width: none;
+    }
+
+    .carousel::-webkit-scrollbar { display: none; }
+
+    .book-card {
+      flex: 0 0 250px;
+      scroll-snap-align: start;
+      border-radius: 28px;
+      overflow: hidden;
+      background: rgba(255,255,255,.075);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 22px 65px rgba(0,0,0,.36);
+      position: relative;
+      min-height: 430px;
+    }
+
+    .cover {
+      height: 300px;
+      position: relative;
+      overflow: hidden;
+      background: #12131a;
+    }
+
+    .cover img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .cover::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.9));
+    }
+
+    .badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 2;
+      background: rgba(255,255,255,.92);
+      color: #08090d;
+      padding: 8px 11px;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 1000;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 3;
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 14px;
+      color: #fff;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+      font-size: 1.1rem;
+    }
+
+    .info {
+      padding: 18px;
+    }
+
+    .info h4 {
+      font-family: Playfair Display, serif;
+      font-size: 1.9rem;
+      line-height: .95;
+      letter-spacing: -.05em;
+      margin-bottom: 9px;
+    }
+
+    .info p {
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.45;
+      min-height: 42px;
+      margin-bottom: 15px;
+    }
+
+    .read-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 16px;
+      padding: 14px;
+      color: #05060a;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      font-weight: 1000;
+    }
+
+    .empty {
+      min-width: 100%;
+      border-radius: 28px;
+      border: 1px dashed rgba(255,255,255,.2);
+      background: rgba(255,255,255,.055);
+      padding: 28px;
+      color: var(--muted);
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .auth-screen {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .auth-card {
+      width: min(460px, 100%);
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.075);
+      backdrop-filter: blur(20px);
+      border-radius: 34px;
+      padding: 30px;
+      box-shadow: 0 30px 90px rgba(0,0,0,.5);
+    }
+
+    .auth-card h1 {
+      font-family: Playfair Display, serif;
+      font-size: 4rem;
+      line-height: .84;
+      letter-spacing: -.07em;
+      margin-bottom: 14px;
+    }
+
+    .auth-card p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 22px;
+    }
+
+    .auth-card input {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 12px;
+      outline: 0;
+    }
+
+    .auth-card button { width: 100%; margin-top: 4px; }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0,0,0,.76);
+      backdrop-filter: blur(20px);
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .modal.open { display: block; }
+
+    .modal-box {
+      width: min(780px, 100%);
+      margin: 20px auto;
+      border-radius: 34px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.13);
+      background: linear-gradient(180deg, #171923, #090a0f);
+      box-shadow: 0 30px 100px rgba(0,0,0,.65);
+    }
+
+    .modal-head {
+      padding: 24px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+
+    .modal-head h3 {
+      font-family: Playfair Display, serif;
+      font-size: 3rem;
+      line-height: .9;
+      letter-spacing: -.06em;
+    }
+
+    .modal-head p {
+      color: var(--muted);
+      margin-top: 10px;
+      line-height: 1.55;
+    }
+
+    .close {
+      width: 44px;
+      height: 44px;
+      border: 0;
+      border-radius: 15px;
+      background: rgba(255,255,255,.1);
+      color: #fff;
+      font-size: 1.25rem;
+      flex: 0 0 auto;
+    }
+
+    .form {
+      padding: 24px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .form label {
+      font-weight: 900;
+      font-size: .9rem;
+      color: #dbe5ff;
+      margin-bottom: -4px;
+    }
+
+    .form input,
+    .form textarea,
+    .form select {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.13);
+      background: rgba(255,255,255,.075);
+      color: #fff;
+      border-radius: 18px;
+      padding: 16px;
+      outline: 0;
+      font-size: 1rem;
+    }
+
+    .form option { color: #111; }
+
+    .form textarea {
+      min-height: 210px;
+      resize: vertical;
+      line-height: 1.7;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: .86rem;
+      line-height: 1.5;
+    }
+
+    .file-box {
+      border: 1px dashed rgba(255,255,255,.22);
+      background: rgba(255,255,255,.05);
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    .file-box input { border: 0; background: transparent; padding: 0; }
+
+    .check-box {
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(142,227,255,.08);
+      border: 1px solid rgba(142,227,255,.16);
+      color: #dbefff;
+      font-size: .92rem;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .save {
+      margin-top: 8px;
+      border: 0;
+      border-radius: 18px;
+      padding: 17px;
+      color: #05060a;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      font-weight: 1000;
+    }
+
+    .reader {
+      display: none;
+      min-height: 100vh;
+      background: var(--readerBg);
+      color: var(--readerText);
+    }
+
+    .reader.open { display: block; }
+
+    .reader-bar {
+      position: sticky;
+      top: 0;
+      z-index: 80;
+      background: rgba(245,239,228,.9);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(0,0,0,.08);
+    }
+
+    .reader-controls {
+      width: min(900px, 100%);
+      margin: 0 auto;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .reader-controls button,
+    .reader-controls select {
+      border: 0;
+      border-radius: 14px;
+      padding: 11px 12px;
+      background: #171717;
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .reader-page-wrap {
+      width: min(820px, 100%);
+      margin: 0 auto;
+      padding: 22px 16px 100px;
+    }
+
+    .reader-cover {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 30px;
+      box-shadow: 0 22px 60px rgba(0,0,0,.22);
+      margin-bottom: 22px;
+    }
+
+    .reader-title {
+      font-family: Playfair Display, serif;
+      font-size: clamp(2.8rem, 11vw, 5.6rem);
+      line-height: .85;
+      letter-spacing: -.07em;
+      margin-bottom: 10px;
+    }
+
+    .reader-sinopse {
+      color: #6a6258;
+      line-height: 1.65;
+      margin-bottom: 24px;
+    }
+
+    .kindle-page {
+      background: rgba(255,255,255,.58);
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 28px;
+      min-height: 58vh;
+      padding: clamp(22px, 5vw, 42px);
+      box-shadow: 0 18px 55px rgba(0,0,0,.12);
+      font-family: Literata, serif;
+      font-size: 1.28rem;
+      line-height: 1.92;
+      white-space: pre-line;
+    }
+
+    .page-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .page-nav button {
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 18px;
+      background: #171717;
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .page-nav span {
+      color: #6a6258;
+      font-weight: 900;
+      font-size: .92rem;
+    }
+
+    .comic {
+      display: grid;
+      gap: 16px;
+    }
+
+    .comic img {
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: 0 18px 55px rgba(0,0,0,.2);
+      background: #ddd;
+      display: block;
+    }
+
+    .loading { opacity: .6; pointer-events: none; }
+
+    @media (max-width: 720px) {
+      .app { padding: 12px; }
+      .brand p { display: none; }
+      .brand-icon { width: 42px; height: 42px; border-radius: 15px; }
+      .brand h1 { font-size: .9rem; }
+      .btn { padding: 11px 12px; font-size: .82rem; }
+      .hero-panel { min-height: 420px; border-radius: 30px; padding: 22px; }
+      .hero p { font-size: .94rem; }
+      .book-card { flex-basis: 235px; min-height: 420px; }
+      .cover { height: 285px; }
+      .info h4 { font-size: 1.75rem; }
+      .modal-box { margin: 6px auto; border-radius: 26px; }
+      .modal-head h3 { font-size: 2.4rem; }
+      .reader-cover { height: 230px; }
+      .kindle-page { min-height: 56vh; font-size: 1.14rem; line-height: 1.88; }
+      .reader-controls { justify-content: center; }
+      .reader-controls > button:first-child { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<section id="auth" class="auth-screen">
+  <div class="auth-card">
+    <h1>Biblioteca Assis</h1>
+    <p>Entre para acessar sua biblioteca privada no celular ou computador.</p>
+    <input id="email" type="email" placeholder="Seu e-mail">
+    <input id="senha" type="password" placeholder="Sua senha">
+    <button class="btn btn-main" onclick="entrar()">Entrar</button>
+    <button class="btn btn-ghost" onclick="cadastrar()">Criar conta</button>
+  </div>
+</section>
+
+<main id="home" class="app hide">
+  <header class="topbar">
+    <div class="topbar-card">
+      <div class="brand">
+        <div class="brand-icon">A</div>
+        <div>
+          <h1>Biblioteca Assis</h1>
+          <p>Contos, livros e gibis</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-main" onclick="abrirModal()">+ Adicionar</button>
+        <button class="btn btn-ghost" onclick="sair()">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-panel">
+      <div class="hero-content">
+        <div class="kicker">Biblioteca privada</div>
+        <h2>Leia como se estivesse no seu próprio Kindle.</h2>
+        <p>Contos em páginas, gibis em rolagem vertical e uma estante moderna feita para celular.</p>
+      </div>
+    </div>
+  </section>
+
+  <nav class="tabs">
+    <button id="tabTodos" class="tab active" onclick="filtrar('todos')">Tudo</button>
+    <button id="tabContos" class="tab" onclick="filtrar('conto')">Contos</button>
+    <button id="tabGibis" class="tab" onclick="filtrar('gibi')">Gibis</button>
+  </nav>
+
+  <div class="section-title">
+    <div>
+      <h3 id="tituloSecao">Sua estante</h3>
+      <span id="contador">0 itens</span>
+    </div>
+  </div>
+
+  <section id="carousel" class="carousel"></section>
+</main>
+
+<section id="reader" class="reader">
+  <div class="reader-bar">
+    <div class="reader-controls">
+      <button onclick="fecharLeitor()">← Voltar</button>
+      <div>
+        <button onclick="mudarTamanho(-1)">A-</button>
+        <button onclick="mudarTamanho(1)">A+</button>
+        <select onchange="mudarFonte(this.value)">
+          <option value="Literata">Kindle</option>
+          <option value="Merriweather">Confortável</option>
+          <option value="Georgia">Clássica</option>
+          <option value="Inter">Moderna</option>
+        </select>
+        <button onclick="alternarTemaLeitor()">Tema</button>
+      </div>
+    </div>
+  </div>
+
+  <article class="reader-page-wrap">
+    <img id="readerCapa" class="reader-cover" src="" alt="Capa">
+    <h1 id="readerTitulo" class="reader-title"></h1>
+    <p id="readerSinopse" class="reader-sinopse"></p>
+    <div id="readerConteudo"></div>
+  </article>
+</section>
+
+<section id="modal" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <h3>Adicionar história</h3>
+        <p>Escolha capa, cole o texto ou selecione páginas do gibi direto do celular.</p>
+      </div>
+      <button class="close" onclick="fecharModal()">×</button>
+    </div>
+
+    <div class="form" id="formAdicionar">
+      <label>Tipo</label>
+      <select id="tipo" onchange="mudarTipo()">
+        <option value="conto">Conto ou livro</option>
+        <option value="gibi">Gibi ou páginas ilustradas</option>
+      </select>
+
+      <label>Nome</label>
+      <input id="titulo" placeholder="Exemplo: O Filho Que Fui">
+
+      <label>Capa</label>
+      <div class="file-box">
+        <input id="capa" type="file" accept="image/*">
+      </div>
+
+      <label>Sinopse</label>
+      <textarea id="sinopse" placeholder="Escreva uma sinopse curta"></textarea>
+
+      <label id="textoLabel">Texto</label>
+      <textarea id="texto" spellcheck="true" placeholder="Cole o texto inteiro aqui. O navegador pode sublinhar erros de escrita."></textarea>
+
+      <div id="paginasBox" class="hide">
+        <label>Páginas do gibi</label>
+        <div class="file-box">
+          <input id="paginas" type="file" accept="image/*" multiple>
+        </div>
+        <div class="hint">Selecione várias imagens de uma vez. O gibi abrirá em rolagem vertical no celular.</div>
+      </div>
+
+      <label>Fonte padrão</label>
+      <select id="fontePadrao">
+        <option value="Literata">Kindle</option>
+        <option value="Merriweather">Confortável</option>
+        <option value="Georgia">Clássica</option>
+        <option value="Inter">Moderna</option>
+      </select>
+
+      <button class="btn btn-ghost" onclick="verificarTextoSimples()" type="button">Verificar texto básico</button>
+      <div id="resultadoVerificacao" class="check-box"></div>
+
+      <button class="save" onclick="adicionar()">Salvar na biblioteca</button>
+    </div>
+  </div>
+</section>
+
+<script>
+  const SUPABASE_URL = 'https://emzpuvnauhxpaevummkk.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_rTMWf9iQgTRv1x6Rd2rYqw_2prYRmSt';
+  const BUCKET = 'biblioteca';
+
+  const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let usuario = null;
+  let livros = [];
+  let filtro = 'todos';
+  let fonteSize = 1.28;
+  let leitorEscuro = false;
+  let paginasTexto = [];
+  let paginaAtual = 0;
+
+  const auth = document.getElementById('auth');
+  const home = document.getElementById('home');
+  const carousel = document.getElementById('carousel');
+
+  async function iniciar() {
+    const { data } = await client.auth.getSession();
+    usuario = data.session?.user || null;
+    if (usuario) {
+      auth.classList.add('hide');
+      home.classList.remove('hide');
+      await carregarLivros();
+    } else {
+      auth.classList.remove('hide');
+      home.classList.add('hide');
+    }
+  }
+
+  async function cadastrar() {
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value.trim();
+    const { error } = await client.auth.signUp({ email, password: senha });
+    if (error) return alert(error.message);
+    alert('Conta criada. Agora clique em Entrar.');
+  }
+
+  async function entrar() {
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value.trim();
+    const { data, error } = await client.auth.signInWithPassword({ email, password: senha });
+    if (error) return alert(error.message);
+    usuario = data.user;
+    auth.classList.add('hide');
+    home.classList.remove('hide');
+    await carregarLivros();
+  }
+
+  async function sair() {
+    await client.auth.signOut();
+    usuario = null;
+    livros = [];
+    home.classList.add('hide');
+    auth.classList.remove('hide');
+  }
+
+  async function carregarLivros() {
+    const { data, error } = await client
+      .from('livros')
+      .select('*, paginas(*)')
+      .order('created_at', { ascending: false });
+
+    if (error) return alert('Erro ao carregar: ' + error.message);
+
+    livros = data || [];
+
+    for (const livro of livros) {
+      if (livro.capa_path) livro.capa_url = await criarUrlAssinada(livro.capa_path);
+      if (livro.paginas) {
+        livro.paginas.sort((a,b) => a.ordem - b.ordem);
+        for (const p of livro.paginas) p.url = await criarUrlAssinada(p.path);
+      }
+    }
+
+    renderizar();
+  }
+
+  async function criarUrlAssinada(path) {
+    const { data, error } = await client.storage.from(BUCKET).createSignedUrl(path, 60 * 60);
+    if (error) return '';
+    return data.signedUrl;
+  }
+
+  function renderizar() {
+    carousel.innerHTML = '';
+    const lista = filtro === 'todos' ? livros : livros.filter(l => l.tipo === filtro);
+
+    document.getElementById('contador').innerText = lista.length + (lista.length === 1 ? ' item' : ' itens');
+    document.getElementById('tituloSecao').innerText = filtro === 'todos' ? 'Sua estante' : filtro === 'conto' ? 'Contos' : 'Gibis';
+
+    if (!lista.length) {
+      carousel.innerHTML = `<div class="empty"><strong>Nenhuma história ainda.</strong><br>Toque em + Adicionar para colocar seu primeiro conto ou gibi.</div>`;
+      return;
+    }
+
+    lista.forEach(livro => {
+      const indexReal = livros.findIndex(l => l.id === livro.id);
+      const card = document.createElement('div');
+      card.className = 'book-card';
+      card.innerHTML = `
+        <button class="delete-btn" onclick="remover('${livro.id}')">×</button>
+        <div class="cover">
+          <span class="badge">${livro.tipo === 'gibi' ? 'GIBI' : 'CONTO'}</span>
+          <img src="${livro.capa_url || 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?q=80&w=1200&auto=format&fit=crop'}" alt="Capa">
+        </div>
+        <div class="info">
+          <h4>${livro.titulo}</h4>
+          <p>${livro.sinopse || 'Sem sinopse.'}</p>
+          <button class="read-btn" onclick="abrir(${indexReal})">${livro.tipo === 'gibi' ? 'Abrir gibi' : 'Ler agora'}</button>
+        </div>`;
+      carousel.appendChild(card);
+    });
+  }
+
+  function filtrar(tipo) {
+    filtro = tipo;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    if (tipo === 'todos') document.getElementById('tabTodos').classList.add('active');
+    if (tipo === 'conto') document.getElementById('tabContos').classList.add('active');
+    if (tipo === 'gibi') document.getElementById('tabGibis').classList.add('active');
+    renderizar();
+  }
+
+  function abrir(index) {
+    const livro = livros[index];
+    home.classList.add('hide');
+    document.getElementById('reader').classList.add('open');
+    document.getElementById('readerCapa').src = livro.capa_url || '';
+    document.getElementById('readerTitulo').innerText = livro.titulo;
+    document.getElementById('readerSinopse').innerText = livro.sinopse || '';
+
+    const area = document.getElementById('readerConteudo');
+
+    if (livro.tipo === 'conto') {
+      area.className = '';
+      paginasTexto = criarPaginas(livro.texto || '', 230);
+      paginaAtual = 0;
+      area.style.fontFamily = livro.fonte || 'Literata';
+      mostrarPagina();
+    } else {
+      area.className = 'comic';
+      area.innerHTML = '';
+      (livro.paginas || []).forEach(p => area.innerHTML += `<img src="${p.url}" alt="Página do gibi">`);
+    }
+
+    window.scrollTo(0,0);
+  }
+
+  function criarPaginas(texto, palavrasPorPagina) {
+    const paragrafos = texto.split('\n').map(p => p.trim()).filter(Boolean);
+    const paginas = [];
+    let atual = '';
+    let contagem = 0;
+
+    paragrafos.forEach(paragrafo => {
+      const palavras = paragrafo.split(/\s+/).length;
+      if (contagem + palavras > palavrasPorPagina && atual.trim()) {
+        paginas.push(atual.trim());
+        atual = '';
+        contagem = 0;
+      }
+      atual += paragrafo + '\n\n';
+      contagem += palavras;
+    });
+
+    if (atual.trim()) paginas.push(atual.trim());
+    return paginas.length ? paginas : [''];
+  }
+
+  function mostrarPagina() {
+    const area = document.getElementById('readerConteudo');
+    area.innerHTML = `
+      <div class="kindle-page" style="font-size:${fonteSize}rem;">${paginasTexto[paginaAtual] || ''}</div>
+      <div class="page-nav">
+        <button onclick="paginaAnterior()">Anterior</button>
+        <span>Página ${paginaAtual + 1} de ${paginasTexto.length}</span>
+        <button onclick="proximaPagina()">Próxima</button>
+      </div>`;
+  }
+
+  function paginaAnterior() {
+    if (paginaAtual > 0) paginaAtual--;
+    mostrarPagina();
+    window.scrollTo(0, 0);
+  }
+
+  function proximaPagina() {
+    if (paginaAtual < paginasTexto.length - 1) paginaAtual++;
+    mostrarPagina();
+    window.scrollTo(0, 0);
+  }
+
+  function fecharLeitor() {
+    document.getElementById('reader').classList.remove('open');
+    home.classList.remove('hide');
+    window.scrollTo(0,0);
+  }
+
+  function abrirModal() { document.getElementById('modal').classList.add('open'); }
+  function fecharModal() { document.getElementById('modal').classList.remove('open'); }
+
+  function mudarTipo() {
+    const tipo = document.getElementById('tipo').value;
+    document.getElementById('texto').classList.toggle('hide', tipo === 'gibi');
+    document.getElementById('textoLabel').classList.toggle('hide', tipo === 'gibi');
+    document.getElementById('paginasBox').classList.toggle('hide', tipo !== 'gibi');
+  }
+
+  async function uploadArquivo(file, pasta) {
+    const ext = file.name.split('.').pop();
+    const nome = `${usuario.id}/${pasta}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await client.storage.from(BUCKET).upload(nome, file, { upsert: false });
+    if (error) throw error;
+    return nome;
+  }
+
+  async function adicionar() {
+    const form = document.getElementById('formAdicionar');
+    form.classList.add('loading');
+
+    try {
+      const tipo = document.getElementById('tipo').value;
+      const titulo = document.getElementById('titulo').value.trim();
+      const sinopse = document.getElementById('sinopse').value.trim();
+      const texto = document.getElementById('texto').value;
+      const fontePadrao = document.getElementById('fontePadrao').value;
+      const capaFile = document.getElementById('capa').files[0];
+      const paginasFiles = Array.from(document.getElementById('paginas').files || []);
+
+      if (!titulo) throw new Error('Coloque o nome da história.');
+      if (!capaFile) throw new Error('Escolha uma imagem de capa.');
+
+      const capaPath = await uploadArquivo(capaFile, 'capas');
+
+      const { data: livro, error } = await client.from('livros').insert({
+        user_id: usuario.id,
+        tipo,
+        titulo,
+        sinopse,
+        texto: tipo === 'conto' ? texto : null,
+        fonte: fontePadrao,
+        capa_path: capaPath
+      }).select().single();
+
+      if (error) throw error;
+
+      if (tipo === 'gibi') {
+        if (!paginasFiles.length) throw new Error('Escolha as páginas do gibi.');
+        for (let i = 0; i < paginasFiles.length; i++) {
+          const path = await uploadArquivo(paginasFiles[i], `gibis/${livro.id}`);
+          const { error: pageError } = await client.from('paginas').insert({
+            livro_id: livro.id,
+            user_id: usuario.id,
+            path,
+            ordem: i + 1
+          });
+          if (pageError) throw pageError;
+        }
+      }
+
+      fecharModal();
+      limparFormulario();
+      await carregarLivros();
+    } catch (e) {
+      alert(e.message || 'Erro ao salvar.');
+    } finally {
+      form.classList.remove('loading');
+    }
+  }
+
+  function limparFormulario() {
+    document.getElementById('titulo').value = '';
+    document.getElementById('sinopse').value = '';
+    document.getElementById('texto').value = '';
+    document.getElementById('capa').value = '';
+    document.getElementById('paginas').value = '';
+    document.getElementById('resultadoVerificacao').style.display = 'none';
+  }
+
+  async function remover(id) {
+    const ok = confirm('Apagar esta história?');
+    if (!ok) return;
+    const { error } = await client.from('livros').delete().eq('id', id);
+    if (error) return alert(error.message);
+    await carregarLivros();
+  }
+
+  function mudarTamanho(valor) {
+    fonteSize += valor * .08;
+    if (fonteSize < 1) fonteSize = 1;
+    if (fonteSize > 2.1) fonteSize = 2.1;
+    const page = document.querySelector('.kindle-page');
+    if (page) page.style.fontSize = fonteSize + 'rem';
+  }
+
+  function mudarFonte(nome) {
+    const page = document.querySelector('.kindle-page');
+    if (page) page.style.fontFamily = nome;
+  }
+
+  function alternarTemaLeitor() {
+    leitorEscuro = !leitorEscuro;
+    const reader = document.getElementById('reader');
+    if (leitorEscuro) {
+      reader.style.background = '#11131d';
+      reader.style.color = '#f7f7fb';
+    } else {
+      reader.style.background = '#f5efe4';
+      reader.style.color = '#171717';
+    }
+  }
+
+  function verificarTextoSimples() {
+    const texto = document.getElementById('texto').value;
+    const box = document.getElementById('resultadoVerificacao');
+    const avisos = [];
+
+    if (!texto.trim()) avisos.push('Nenhum texto colado ainda.');
+    if (/ {2,}/.test(texto)) avisos.push('Há espaços duplos no texto.');
+    if (/\.\.\./.test(texto)) avisos.push('Há reticências. Veja se não está usando demais.');
+    if (/\b(como se)\b/gi.test(texto)) avisos.push('Encontrei “como se”. Veja se não está repetindo demais.');
+    if (/\b(parecia)\b/gi.test(texto)) avisos.push('Encontrei “parecia”. Veja se não está repetindo demais.');
+    if (texto.length < 200) avisos.push('Texto muito curto para revisão útil.');
+
+    box.style.display = 'block';
+    box.innerHTML = avisos.length ? avisos.map(a => '• ' + a).join('<br>') : 'Nenhum problema básico encontrado. O corretor do navegador também pode sublinhar erros.';
+  }
+
+  iniciar();
+</script>
+</body>
+</html>
