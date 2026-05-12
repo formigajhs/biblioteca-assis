@@ -596,14 +596,12 @@
 
     .kindle-page {
       position: relative;
-      background: linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,250,241,.72));
-      border: 1px solid rgba(80,60,35,.10);
-      border-radius: 22px;
-      min-height: 60vh;
-      padding: clamp(30px, 6vw, 54px);
-      box-shadow:
-        0 24px 70px rgba(91,64,32,.14),
-        inset 0 0 0 1px rgba(255,255,255,.55);
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      min-height: auto;
+      padding: 0;
+      box-shadow: none;
       font-family: Literata, serif;
       font-size: 1.24rem;
       line-height: 1.95;
@@ -611,25 +609,44 @@
       color: #17130f;
     }
 
-    .kindle-page::before {
-      content: "";
-      position: absolute;
-      inset: 14px;
-      border-radius: 16px;
-      border: 1px solid rgba(0,0,0,.035);
-      pointer-events: none;
+    .reading-flow {
+      min-height: 68vh;
+      padding: 6px 2px 90px;
+      font-family: Literata, serif;
+      font-size: 1.24rem;
+      line-height: 1.95;
+      color: #17130f;
+      white-space: normal;
     }
 
+    .reading-flow p {
+      margin-bottom: 1.35em;
+    }
+
+    .chapter-end {
+      margin-top: 36px;
+      padding: 22px;
+      border-radius: 24px;
+      background: rgba(255,255,255,.48);
+      border: 1px solid rgba(0,0,0,.06);
+      text-align: center;
+      color: #6a6258;
+      font-weight: 800;
+    }
+
+    .chapter-end button {
+      margin-top: 16px;
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 20px;
+      background: #171717;
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .kindle-page::before,
     .kindle-page::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      width: 20px;
-      border-radius: 22px 0 0 22px;
-      background: linear-gradient(90deg, rgba(80,50,20,.08), transparent);
-      pointer-events: none;
+      display: none;
     }
 
     .chapter-top {
@@ -677,47 +694,56 @@
       color: #d9d9e8;
     }
 
-    .reader.dark .kindle-page {
-      background: linear-gradient(180deg, rgba(27,29,42,.96), rgba(16,18,29,.96));
-      border-color: rgba(255,255,255,.1);
+    .reader.dark .kindle-page,
+    .reader.dark .reading-flow {
+      background: transparent;
+      border-color: transparent;
       color: #f7f7fb;
-      box-shadow:
-        0 24px 70px rgba(0,0,0,.28),
-        inset 0 0 0 1px rgba(255,255,255,.05);
+      box-shadow: none;
+    }
+
+    .reader.dark .chapter-end {
+      background: rgba(255,255,255,.06);
+      border-color: rgba(255,255,255,.08);
+      color: #d9d9e8;
     }
 
     .reader.dark .chapter-top,
     .reader.dark .page-nav {
-      background: rgba(255,255,255,.06);
-      border-color: rgba(255,255,255,.08);
+      display: none;
     }
 
-    .page-nav {
+    .reader-bottom-nav {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 90;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      margin-top: 14px;
+      gap: 10px;
       padding: 10px;
-      border-radius: 20px;
-      background: rgba(255,255,255,.38);
-      border: 1px solid rgba(0,0,0,.05);
+      border-radius: 24px;
+      background: rgba(23,23,23,.88);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 18px 50px rgba(0,0,0,.28);
     }
 
-    .page-nav button {
+    .reader-bottom-nav button {
       border: 0;
-      border-radius: 15px;
+      border-radius: 999px;
       padding: 13px 16px;
-      background: #171717;
+      background: rgba(255,255,255,.12);
       color: #fff;
       font-weight: 900;
-      box-shadow: 0 10px 24px rgba(0,0,0,.12);
     }
 
-    .page-nav span {
-      color: #6a6258;
-      font-weight: 900;
-      font-size: .92rem;
+    .reader-bottom-nav span {
+      color: rgba(255,255,255,.78);
+      font-weight: 800;
+      font-size: .82rem;
+      text-align: center;
     }
 
     .comic {
@@ -751,7 +777,8 @@
       .reader-page-wrap { padding: 14px 12px 90px; }
       .reader-cover { height: 185px; border-radius: 24px; }
       .reader-title { font-size: clamp(2.2rem, 10vw, 3.6rem); }
-      .kindle-page { min-height: 58vh; font-size: 1.12rem; line-height: 1.9; padding: 30px 24px; border-radius: 20px; }
+      .kindle-page, .reading-flow { font-size: 1.12rem; line-height: 1.92; }
+      .reading-flow { min-height: 70vh; padding-bottom: 105px; }
       .chapter-top { padding: 10px; }
       .chapter-select { width: 100%; }
       .page-nav { gap: 8px; }
@@ -760,6 +787,175 @@
       .reader-controls { justify-content: center; }
       .reader-controls > button:first-child { width: 100%; }
     }
+  
+
+    /* ===== LEITOR PREMIUM V2 - ALTERAÇÃO VISÍVEL ===== */
+    .reader {
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,.9), transparent 28%),
+        linear-gradient(180deg, #f8f1e6 0%, #eee0cb 100%) !important;
+      color: #17130f !important;
+    }
+
+    .reader-bar {
+      background: rgba(248,241,230,.86) !important;
+      backdrop-filter: blur(18px) !important;
+      border-bottom: 1px solid rgba(80,60,35,.08) !important;
+      box-shadow: 0 10px 35px rgba(80,60,35,.08) !important;
+    }
+
+    .reader-controls {
+      width: min(920px, 100%) !important;
+      padding: 10px 12px !important;
+    }
+
+    .reader-controls button,
+    .reader-controls select {
+      border-radius: 999px !important;
+      padding: 10px 13px !important;
+      background: #201a14 !important;
+      box-shadow: 0 8px 22px rgba(80,60,35,.12) !important;
+    }
+
+    .reader-page-wrap {
+      width: min(760px, 100%) !important;
+      padding: 16px 14px 110px !important;
+    }
+
+    .reader-cover {
+      height: 180px !important;
+      border-radius: 24px !important;
+      box-shadow: 0 18px 46px rgba(80,60,35,.16) !important;
+      margin-bottom: 20px !important;
+    }
+
+    .reader-title {
+      font-size: clamp(2.2rem, 9vw, 4.4rem) !important;
+      line-height: .9 !important;
+      color: #17130f !important;
+      margin-bottom: 8px !important;
+    }
+
+    .reader-sinopse {
+      color: #7b6d5d !important;
+      line-height: 1.55 !important;
+      margin-bottom: 18px !important;
+      font-size: .95rem !important;
+    }
+
+    .chapter-top {
+      padding: 12px !important;
+      border-radius: 18px !important;
+      background: rgba(255,255,255,.52) !important;
+      border: 1px solid rgba(80,60,35,.08) !important;
+      box-shadow: 0 10px 28px rgba(80,60,35,.06) !important;
+      margin-bottom: 12px !important;
+    }
+
+    .chapter-title {
+      font-size: clamp(1.9rem, 7vw, 3.1rem) !important;
+      line-height: .94 !important;
+      margin: 16px 0 16px !important;
+      color: #17130f !important;
+    }
+
+    .kindle-page {
+      position: relative !important;
+      background:
+        linear-gradient(90deg, rgba(95,70,35,.08), transparent 34px),
+        linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,250,241,.92)) !important;
+      border: 1px solid rgba(80,60,35,.10) !important;
+      border-radius: 18px !important;
+      min-height: 64vh !important;
+      padding: clamp(34px, 6vw, 58px) !important;
+      box-shadow:
+        0 28px 80px rgba(80,60,35,.18),
+        inset 0 0 0 1px rgba(255,255,255,.75) !important;
+      font-size: 1.26rem !important;
+      line-height: 2.02 !important;
+      color: #1b1712 !important;
+    }
+
+    .kindle-page::before {
+      content: "";
+      position: absolute;
+      inset: 14px;
+      border: 1px solid rgba(80,60,35,.045);
+      border-radius: 12px;
+      pointer-events: none;
+    }
+
+    .kindle-page::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 22px;
+      border-radius: 18px 0 0 18px;
+      background: linear-gradient(90deg, rgba(80,48,18,.12), transparent);
+      pointer-events: none;
+    }
+
+    .page-nav {
+      padding: 10px !important;
+      border-radius: 18px !important;
+      background: rgba(255,255,255,.48) !important;
+      border: 1px solid rgba(80,60,35,.08) !important;
+      box-shadow: 0 10px 28px rgba(80,60,35,.06) !important;
+      margin-top: 12px !important;
+    }
+
+    .page-nav button {
+      border-radius: 999px !important;
+      padding: 12px 15px !important;
+      background: #201a14 !important;
+      box-shadow: 0 10px 24px rgba(80,60,35,.12) !important;
+    }
+
+    .reader.dark {
+      background: linear-gradient(180deg, #11131d 0%, #08090d 100%) !important;
+      color: #f7f7fb !important;
+    }
+
+    .reader.dark .kindle-page {
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.05), transparent 34px),
+        linear-gradient(180deg, rgba(28,31,45,.98), rgba(17,19,29,.98)) !important;
+      border-color: rgba(255,255,255,.10) !important;
+      color: #f7f7fb !important;
+      box-shadow:
+        0 28px 80px rgba(0,0,0,.34),
+        inset 0 0 0 1px rgba(255,255,255,.05) !important;
+    }
+
+    .reader.dark .chapter-top,
+    .reader.dark .page-nav {
+      background: rgba(255,255,255,.06) !important;
+      border-color: rgba(255,255,255,.08) !important;
+    }
+
+    .reader.dark .reader-title,
+    .reader.dark .chapter-title,
+    .reader.dark .chapter-label,
+    .reader.dark .page-nav span,
+    .reader.dark .reader-sinopse {
+      color: #f7f7fb !important;
+    }
+
+    @media (max-width: 720px) {
+      .reader-page-wrap { padding: 12px 12px 95px !important; }
+      .reader-cover { height: 135px !important; border-radius: 20px !important; margin-bottom: 14px !important; }
+      .reader-title { font-size: clamp(2rem, 9vw, 3.2rem) !important; }
+      .reader-sinopse { font-size: .88rem !important; margin-bottom: 14px !important; }
+      .kindle-page { min-height: 62vh !important; font-size: 1.12rem !important; line-height: 1.95 !important; padding: 34px 24px !important; border-radius: 18px !important; }
+      .chapter-top { padding: 10px !important; }
+      .chapter-select { width: 100% !important; }
+      .page-nav { gap: 8px !important; padding: 8px !important; }
+      .page-nav button { padding: 11px 12px !important; font-size: .84rem !important; }
+      .page-nav span { font-size: .76rem !important; text-align: center !important; }
+    }
+
   </style>
 </head>
 <body>
@@ -916,6 +1112,7 @@
   let capituloAtual = 0;
   let paginasTexto = [];
   let paginaAtual = 0;
+  let modoScrollCapitulo = true;
   let fonteAtual = 'Literata';
 
   const auth = document.getElementById('auth');
@@ -1166,60 +1363,73 @@
     }
   }
 
-  function mostrarPagina() {
-    const area = document.getElementById('readerConteudo');
-    const capitulo = capitulosTexto[capituloAtual] || { titulo: 'Texto', texto: '' };
-    const opcoes = capitulosTexto.map((cap, i) => `
-      <option value="${i}" ${i === capituloAtual ? 'selected' : ''}>${escaparHTML(cap.titulo || 'Capítulo ' + (i + 1))}</option>
-    `).join('');
+  function formatarTextoCapitulo(texto) {
+  const blocos = String(texto || '')
+    .split('\n')
+    .map(p => p.trim())
+    .filter(Boolean);
 
-    area.innerHTML = `
-      <div class="chapter-top">
-        <div class="chapter-label">Capítulo ${capituloAtual + 1} de ${capitulosTexto.length}</div>
-        <select class="chapter-select" onchange="irParaCapitulo(this.value)">${opcoes}</select>
+  return blocos.map(p => `<p>${escaparHTML(p)}</p>`).join('');
+}
+
+function mostrarPagina() {
+  const area = document.getElementById('readerConteudo');
+  const capitulo = capitulosTexto[capituloAtual] || { titulo: 'Texto', texto: '' };
+
+  const opcoes = capitulosTexto.map((cap, i) => `
+    <option value="${i}" ${i === capituloAtual ? 'selected' : ''}>
+      ${escaparHTML(cap.titulo || 'Capítulo ' + (i + 1))}
+    </option>
+  `).join('');
+
+  const textoCompleto = capitulo.texto || paginasTexto.join('\n\n') || '';
+  const temProximo = capituloAtual < capitulosTexto.length - 1;
+  const temAnterior = capituloAtual > 0;
+
+  area.innerHTML = `
+    <div class="chapter-top">
+      <div class="chapter-label">Capítulo ${capituloAtual + 1} de ${capitulosTexto.length}</div>
+      <select class="chapter-select" onchange="irParaCapitulo(this.value)">
+        ${opcoes}
+      </select>
+    </div>
+
+    <h2 class="chapter-title">${escaparHTML(capitulo.titulo || 'Capítulo ' + (capituloAtual + 1))}</h2>
+
+    <div class="reading-flow" style="font-size:${fonteSize}rem; font-family:${fonteAtual};">
+      ${formatarTextoCapitulo(textoCompleto)}
+
+      <div class="chapter-end">
+        Fim do capítulo ${capituloAtual + 1}
+        <br>
+        ${
+          temProximo
+            ? '<button onclick="proximoCapitulo()">Ler próximo capítulo</button>'
+            : '<span>Você chegou ao final desta história.</span>'
+        }
       </div>
+    </div>
 
-      <h2 class="chapter-title">${escaparHTML(capitulo.titulo || 'Capítulo ' + (capituloAtual + 1))}</h2>
+    <div class="reader-bottom-nav">
+      <button onclick="capituloAnterior()" ${temAnterior ? '' : 'style="opacity:.35;pointer-events:none;"'}>
+        Anterior
+      </button>
 
-      <div class="kindle-page" style="font-size:${fonteSize}rem; font-family:${fonteAtual};">${escaparHTML(paginasTexto[paginaAtual] || '')}</div>
+      <span>Cap. ${capituloAtual + 1} de ${capitulosTexto.length}</span>
 
-      <div class="page-nav">
-        <button onclick="paginaAnterior()">Anterior</button>
-        <span>Página ${paginaAtual + 1} de ${paginasTexto.length}</span>
-        <button onclick="proximaPagina()">Próxima</button>
-      </div>
-
-      <div class="page-nav">
-        <button onclick="capituloAnterior()">Capítulo anterior</button>
-        <span>${escaparHTML(capitulo.titulo || '')}</span>
-        <button onclick="proximoCapitulo()">Próximo capítulo</button>
-      </div>`;
-  }
+      <button onclick="proximoCapitulo()" ${temProximo ? '' : 'style="opacity:.35;pointer-events:none;"'}>
+        Próximo
+      </button>
+    </div>
+  `;
+}
 
   function paginaAnterior() {
-    if (paginaAtual > 0) {
-      paginaAtual--;
-    } else if (capituloAtual > 0) {
-      capituloAtual--;
-      prepararPaginasDoCapitulo();
-      paginaAtual = paginasTexto.length - 1;
-    }
-
-    mostrarPagina();
-    window.scrollTo(0, 0);
+    capituloAnterior();
   }
 
   function proximaPagina() {
-    if (paginaAtual < paginasTexto.length - 1) {
-      paginaAtual++;
-    } else if (capituloAtual < capitulosTexto.length - 1) {
-      capituloAtual++;
-      paginaAtual = 0;
-      prepararPaginasDoCapitulo();
-    }
-
-    mostrarPagina();
-    window.scrollTo(0, 0);
+    proximoCapitulo();
   }
 
   function fecharLeitor() {
@@ -1322,13 +1532,13 @@
     fonteSize += valor * .08;
     if (fonteSize < 1) fonteSize = 1;
     if (fonteSize > 2.1) fonteSize = 2.1;
-    const page = document.querySelector('.kindle-page');
+    const page = document.querySelector('.reading-flow');
     if (page) page.style.fontSize = fonteSize + 'rem';
   }
 
   function mudarFonte(nome) {
     fonteAtual = nome;
-    const page = document.querySelector('.kindle-page');
+    const page = document.querySelector('.reading-flow');
     if (page) page.style.fontFamily = nome;
   }
 
