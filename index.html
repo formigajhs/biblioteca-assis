@@ -141,34 +141,52 @@
       padding: 26px 0 18px;
     }
 
-    .hero-panel {
-      min-height: 440px;
+    .hero-showcase {
+      min-height: 480px;
       border-radius: 34px;
       overflow: hidden;
       position: relative;
       border: 1px solid rgba(255,255,255,.14);
-      background:
-        linear-gradient(145deg, rgba(10,10,15,.92), rgba(22,22,35,.82));
+      background: linear-gradient(145deg, #090b12, #111827);
       box-shadow: 0 30px 90px rgba(0,0,0,.44);
-      display: flex;
-      align-items: flex-end;
-      padding: 28px;
     }
 
-    .hero-panel::before {
+    .hero-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .35s ease, transform .35s ease;
+      transform: scale(1.015);
+      display: flex;
+      align-items: flex-end;
+      padding: 34px;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .hero-slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    .hero-slide::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 70% 20%, rgba(142,227,255,.22), transparent 32%);
+      background:
+        linear-gradient(90deg, rgba(0,0,0,.88) 0%, rgba(0,0,0,.55) 45%, rgba(0,0,0,.18) 100%),
+        linear-gradient(180deg, rgba(0,0,0,.05) 0%, rgba(0,0,0,.72) 100%);
     }
 
-    .hero-content {
+    .hero-slide-content {
       position: relative;
-      width: min(720px, 100%);
       z-index: 2;
+      width: min(760px, 100%);
     }
 
-    .kicker {
+    .hero-kicker {
       display: inline-flex;
       padding: 10px 14px;
       border-radius: 999px;
@@ -176,79 +194,102 @@
       background: linear-gradient(135deg, var(--accent), var(--warm));
       font-weight: 1000;
       font-size: .82rem;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
 
-    .hero h2 {
+    .hero-slide h2 {
       font-family: Playfair Display, serif;
-      font-size: clamp(3rem, 13vw, 6.8rem);
-      line-height: .86;
-      letter-spacing: -.07em;
-      text-shadow: 0 18px 70px rgba(0,0,0,.62);
+      font-size: clamp(2.7rem, 9vw, 5.8rem);
+      line-height: .88;
+      letter-spacing: -.065em;
+      text-shadow: 0 18px 70px rgba(0,0,0,.72);
+      max-width: 760px;
     }
 
-    .hero p {
+    .hero-slide p {
       margin-top: 18px;
-      color: #dde2ef;
-      max-width: 610px;
-      line-height: 1.65;
-      font-size: 1rem;
+      color: #e5e8f0;
+      max-width: 650px;
+      line-height: 1.55;
+      font-size: 1.03rem;
+      text-shadow: 0 8px 24px rgba(0,0,0,.7);
     }
 
-    .hero-slider {
-      margin-top: 28px;
+    .hero-actions {
+      margin-top: 22px;
       display: flex;
-      gap: 16px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      padding-bottom: 8px;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
-    .hero-slider::-webkit-scrollbar {
-      display: none;
+    .hero-action-main,
+    .hero-action-ghost {
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-weight: 1000;
     }
 
-    .hero-book {
-      flex: 0 0 180px;
-      height: 240px;
-      border-radius: 24px;
-      overflow: hidden;
-      position: relative;
-      border: 1px solid rgba(255,255,255,.12);
-      box-shadow: 0 18px 45px rgba(0,0,0,.35);
-      transition: .25s ease;
+    .hero-action-main {
+      color: #05060a;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
     }
 
-    .hero-book:hover {
-      transform: translateY(-6px) scale(1.02);
+    .hero-action-ghost {
+      color: #fff;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.14);
+      backdrop-filter: blur(12px);
     }
 
-    .hero-book img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .hero-book::after {
-      content: "";
+    .hero-nav {
       position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.88));
+      z-index: 3;
+      left: 24px;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
     }
 
-    .hero-book span {
-      position: absolute;
-      left: 14px;
-      bottom: 14px;
-      z-index: 2;
+    .hero-nav button {
+      pointer-events: auto;
+      width: 46px;
+      height: 46px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(0,0,0,.48);
       color: white;
+      font-size: 1.5rem;
       font-weight: 900;
-      font-size: .95rem;
-      line-height: 1.1;
-      text-shadow: 0 4px 12px rgba(0,0,0,.6);
+      backdrop-filter: blur(10px);
     }
 
+    .hero-dots {
+      position: absolute;
+      z-index: 4;
+      left: 0;
+      right: 0;
+      top: 18px;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .hero-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      border: 0;
+      background: rgba(255,255,255,.42);
+    }
+
+    .hero-dot.active {
+      background: #fff;
+      width: 28px;
+    }
 
     .tabs {
       display: flex;
@@ -1095,6 +1136,17 @@
       .page-nav span { font-size: .76rem !important; text-align: center !important; }
     }
 
+  
+
+    @media (max-width: 720px) {
+      .hero-showcase { min-height: 520px; border-radius: 30px; }
+      .hero-slide { padding: 24px; align-items: flex-end; }
+      .hero-slide h2 { font-size: clamp(2.4rem, 13vw, 4.2rem); }
+      .hero-slide p { font-size: .94rem; }
+      .hero-nav { left: 12px; right: 12px; }
+      .hero-nav button { width: 40px; height: 40px; }
+      .hero-actions button { width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -1128,14 +1180,7 @@
   </header>
 
   <section class="hero">
-    <div class="hero-panel">
-      <div class="hero-content">
-        <div class="kicker">Biblioteca privada</div>
-        <h2>Leia como se estivesse no seu próprio Kindle.</h2>
-        <p>Contos em páginas, gibis em rolagem vertical e uma estante moderna feita para celular.</p>
-        <div class="hero-slider" id="heroSlider"></div>
-      </div>
-    </div>
+    <div class="hero-showcase" id="heroSlider"></div>
   </section>
 
   <nav class="tabs">
@@ -1254,6 +1299,7 @@
   let paginaAtual = 0;
   let modoScrollCapitulo = true;
   let fonteAtual = 'Literata';
+  let heroAtual = 0;
 
   const auth = document.getElementById('auth');
   const home = document.getElementById('home');
@@ -1759,31 +1805,68 @@
 
   function renderizarHero() {
     const hero = document.getElementById('heroSlider');
-
     if (!hero) return;
 
-    hero.innerHTML = '';
+    const lista = livros.length ? livros.slice(0, 8) : [{
+      titulo: 'Biblioteca Assis',
+      sinopse: 'Adicione seus contos e gibis para montar sua vitrine de leitura.',
+      capa_url: 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?q=80&w=1600&auto=format&fit=crop'
+    }];
 
-    const lista = livros.slice(0, 10);
+    if (heroAtual > lista.length - 1) heroAtual = 0;
 
-    if (!lista.length) {
-      hero.innerHTML = `
-        <div class="hero-book">
-          <img src="https://images.unsplash.com/photo-1519682337058-a94d519337bc?q=80&w=1200&auto=format&fit=crop">
-          <span>Sua biblioteca começa aqui</span>
+    const slides = lista.map((livro, i) => {
+      const indexReal = livros.findIndex(l => l.id === livro.id);
+      const capa = livro.capa_url || 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?q=80&w=1600&auto=format&fit=crop';
+      const sinopse = livro.sinopse || 'Abra para continuar lendo esta história.';
+      const botao = indexReal >= 0
+        ? `<button class="hero-action-main" onclick="abrir(${indexReal})">Ler agora</button>`
+        : `<button class="hero-action-main" onclick="abrirModal()">Adicionar história</button>`;
+
+      return `
+        <div class="hero-slide ${i === heroAtual ? 'active' : ''}" style="background-image:url('${capa}')">
+          <div class="hero-slide-content">
+            <div class="hero-kicker">${livro.tipo === 'gibi' ? 'Gibi em destaque' : 'Conto em destaque'}</div>
+            <h2>${escaparHTML(livro.titulo || 'Biblioteca Assis')}</h2>
+            <p>${escaparHTML(sinopse)}</p>
+            <div class="hero-actions">
+              ${botao}
+              <button class="hero-action-ghost" onclick="abrirModal()">Adicionar novo</button>
+            </div>
+          </div>
         </div>
       `;
-      return;
-    }
+    }).join('');
 
-    lista.forEach(livro => {
-      hero.innerHTML += `
-        <div class="hero-book" onclick="abrir(${livros.findIndex(l => l.id === livro.id)})">
-          <img src="${livro.capa_url || 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?q=80&w=1200&auto=format&fit=crop'}" alt="Capa">
-          <span>${livro.titulo}</span>
-        </div>
-      `;
-    });
+    const dots = lista.map((_, i) => `
+      <button class="hero-dot ${i === heroAtual ? 'active' : ''}" onclick="irHero(${i})"></button>
+    `).join('');
+
+    hero.innerHTML = `
+      ${slides}
+      <div class="hero-dots">${dots}</div>
+      <div class="hero-nav">
+        <button onclick="heroAnterior()">‹</button>
+        <button onclick="heroProximo()">›</button>
+      </div>
+    `;
+  }
+
+  function irHero(index) {
+    heroAtual = index;
+    renderizarHero();
+  }
+
+  function heroAnterior() {
+    const total = livros.length ? Math.min(livros.length, 8) : 1;
+    heroAtual = (heroAtual - 1 + total) % total;
+    renderizarHero();
+  }
+
+  function heroProximo() {
+    const total = livros.length ? Math.min(livros.length, 8) : 1;
+    heroAtual = (heroAtual + 1) % total;
+    renderizarHero();
   }
 
   iniciar();
