@@ -706,6 +706,7 @@
   padding: 24px 26px;
 
   color: #f8efe2 !important;
+-webkit-text-fill-color: #f8efe2;
 
   border: 1px solid rgba(255,255,255,.14);
   border-radius: 28px;
@@ -912,11 +913,36 @@
     }
 
     .chapter-title {
-      font-size: clamp(1.9rem, 7vw, 3.1rem) !important;
-      line-height: .94 !important;
-      margin: 16px 0 16px !important;
-      color: #17130f !important;
-    }
+  font-family: Playfair Display, serif;
+  font-size: clamp(2rem, 7vw, 3.4rem);
+  line-height: .95;
+  letter-spacing: -.05em;
+
+  margin: 22px 0 28px;
+  padding: 24px 26px;
+
+  color: #f8efe2 !important;
+  -webkit-text-fill-color: #f8efe2;
+
+  border: 1px solid rgba(255,255,255,.14);
+  border-left: 4px solid rgba(255,255,255,.35);
+
+  border-radius: 28px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #3b2b1f 0%,
+      #5b4029 48%,
+      #8a673f 100%
+    );
+
+  box-shadow:
+    0 22px 55px rgba(70,45,20,.24),
+    inset 0 1px 0 rgba(255,255,255,.18);
+
+  text-shadow: 0 2px 8px rgba(0,0,0,.45);
+}
 
     .kindle-page {
       position: relative !important;
