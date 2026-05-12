@@ -589,9 +589,27 @@
     }
 
     .reader-sinopse {
-      color: #6a6258;
+      position: relative;
+      color: #d8deea;
       line-height: 1.65;
-      margin-bottom: 24px;
+      margin: 14px 0 26px;
+      padding: 18px 18px 18px 20px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 14px 36px rgba(0,0,0,.16);
+      font-size: .98rem;
+    }
+
+    .reader-sinopse::before {
+      content: "Sinopse";
+      display: block;
+      color: #8ee3ff;
+      font-size: .78rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 8px;
     }
 
     .kindle-page {
@@ -654,7 +672,7 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      margin-bottom: 16px;
+      margin: 26px 0 16px;
       flex-wrap: wrap;
       padding: 12px;
       border-radius: 20px;
@@ -683,15 +701,22 @@
       font-size: clamp(1.9rem, 7vw, 3.2rem);
       line-height: .94;
       letter-spacing: -.05em;
-      margin: 18px 0 18px;
-      color: #171717;
+      margin: 18px 0 22px;
+      color: #f7f7fb;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
     }
 
     .reader.dark .chapter-title,
     .reader.dark .chapter-label,
-    .reader.dark .page-nav span,
+    .reader.dark .page-nav span {
+      color: #d9d9e8;
+    }
+
     .reader.dark .reader-sinopse {
       color: #d9d9e8;
+      background: rgba(255,255,255,.06);
+      border-color: rgba(255,255,255,.08);
     }
 
     .reader.dark .kindle-page,
@@ -777,6 +802,8 @@
       .reader-page-wrap { padding: 14px 12px 90px; }
       .reader-cover { height: 185px; border-radius: 24px; }
       .reader-title { font-size: clamp(2.2rem, 10vw, 3.6rem); }
+      .reader-sinopse { font-size: .9rem; padding: 15px; margin: 12px 0 22px; }
+      .chapter-top { margin-top: 24px; }
       .kindle-page, .reading-flow { font-size: 1.12rem; line-height: 1.92; }
       .reading-flow { min-height: 70vh; padding-bottom: 105px; }
       .chapter-top { padding: 10px; }
@@ -1240,7 +1267,8 @@
       area.className = '';
       fonteAtual = livro.fonte || 'Literata';
       capitulosTexto = separarCapitulos(livro.texto || '');
-      capituloAtual = 0;
+      const progressoSalvo = carregarProgresso(livro.id);
+      capituloAtual = Math.min(progressoSalvo.capitulo || 0, Math.max(capitulosTexto.length - 1, 0));
       paginaAtual = 0;
       prepararPaginasDoCapitulo();
       mostrarPagina();
@@ -1335,10 +1363,30 @@
     if (paginaAtual < 0) paginaAtual = 0;
   }
 
+  function salvarProgressoAtual() {
+    const livroAberto = livros.find(l => l.tipo === 'conto' && separarCapitulos(l.texto || '').length === capitulosTexto.length && (separarCapitulos(l.texto || '')[capituloAtual]?.titulo === capitulosTexto[capituloAtual]?.titulo));
+    if (!livroAberto || !usuario) return;
+
+    localStorage.setItem(`biblioteca-assis-progresso-${usuario.id}-${livroAberto.id}`, JSON.stringify({
+      capitulo: capituloAtual,
+      atualizadoEm: new Date().toISOString()
+    }));
+  }
+
+  function carregarProgresso(livroId) {
+    if (!usuario || !livroId) return { capitulo: 0 };
+    try {
+      return JSON.parse(localStorage.getItem(`biblioteca-assis-progresso-${usuario.id}-${livroId}`)) || { capitulo: 0 };
+    } catch {
+      return { capitulo: 0 };
+    }
+  }
+
   function irParaCapitulo(index) {
     capituloAtual = Number(index);
     paginaAtual = 0;
     prepararPaginasDoCapitulo();
+    salvarProgressoAtual();
     mostrarPagina();
     window.scrollTo(0, 0);
   }
@@ -1348,6 +1396,7 @@
       capituloAtual--;
       paginaAtual = 0;
       prepararPaginasDoCapitulo();
+      salvarProgressoAtual();
       mostrarPagina();
       window.scrollTo(0, 0);
     }
@@ -1358,71 +1407,59 @@
       capituloAtual++;
       paginaAtual = 0;
       prepararPaginasDoCapitulo();
+      salvarProgressoAtual();
       mostrarPagina();
       window.scrollTo(0, 0);
     }
   }
 
   function formatarTextoCapitulo(texto) {
-  const blocos = String(texto || '')
-    .split('\n')
-    .map(p => p.trim())
-    .filter(Boolean);
+    const blocos = String(texto || '')
+      .split('
+')
+      .map(p => p.trim())
+      .filter(Boolean);
 
-  return blocos.map(p => `<p>${escaparHTML(p)}</p>`).join('');
-}
+    return blocos.map(p => `<p>${escaparHTML(p)}</p>`).join('');
+  }
 
-function mostrarPagina() {
-  const area = document.getElementById('readerConteudo');
-  const capitulo = capitulosTexto[capituloAtual] || { titulo: 'Texto', texto: '' };
+  function mostrarPagina() {
+    const area = document.getElementById('readerConteudo');
+    const capitulo = capitulosTexto[capituloAtual] || { titulo: 'Texto', texto: '' };
+    const opcoes = capitulosTexto.map((cap, i) => `
+      <option value="${i}" ${i === capituloAtual ? 'selected' : ''}>${escaparHTML(cap.titulo || 'Capítulo ' + (i + 1))}</option>
+    `).join('');
 
-  const opcoes = capitulosTexto.map((cap, i) => `
-    <option value="${i}" ${i === capituloAtual ? 'selected' : ''}>
-      ${escaparHTML(cap.titulo || 'Capítulo ' + (i + 1))}
-    </option>
-  `).join('');
+    const textoCompleto = capitulo.texto || paginasTexto.join('
 
-  const textoCompleto = capitulo.texto || paginasTexto.join('\n\n') || '';
-  const temProximo = capituloAtual < capitulosTexto.length - 1;
-  const temAnterior = capituloAtual > 0;
+') || '';
+    const temProximo = capituloAtual < capitulosTexto.length - 1;
+    const temAnterior = capituloAtual > 0;
 
-  area.innerHTML = `
-    <div class="chapter-top">
-      <div class="chapter-label">Capítulo ${capituloAtual + 1} de ${capitulosTexto.length}</div>
-      <select class="chapter-select" onchange="irParaCapitulo(this.value)">
-        ${opcoes}
-      </select>
-    </div>
-
-    <h2 class="chapter-title">${escaparHTML(capitulo.titulo || 'Capítulo ' + (capituloAtual + 1))}</h2>
-
-    <div class="reading-flow" style="font-size:${fonteSize}rem; font-family:${fonteAtual};">
-      ${formatarTextoCapitulo(textoCompleto)}
-
-      <div class="chapter-end">
-        Fim do capítulo ${capituloAtual + 1}
-        <br>
-        ${
-          temProximo
-            ? '<button onclick="proximoCapitulo()">Ler próximo capítulo</button>'
-            : '<span>Você chegou ao final desta história.</span>'
-        }
+    area.innerHTML = `
+      <div class="chapter-top">
+        <div class="chapter-label">Capítulo ${capituloAtual + 1} de ${capitulosTexto.length}</div>
+        <select class="chapter-select" onchange="irParaCapitulo(this.value)">${opcoes}</select>
       </div>
-    </div>
 
-    <div class="reader-bottom-nav">
-      <button onclick="capituloAnterior()" ${temAnterior ? '' : 'style="opacity:.35;pointer-events:none;"'}>
-        Anterior
-      </button>
+      <h2 class="chapter-title">${escaparHTML(capitulo.titulo || 'Capítulo ' + (capituloAtual + 1))}</h2>
 
-      <span>Cap. ${capituloAtual + 1} de ${capitulosTexto.length}</span>
+      <div class="reading-flow" style="font-size:${fonteSize}rem; font-family:${fonteAtual};">
+        ${formatarTextoCapitulo(textoCompleto)}
 
-      <button onclick="proximoCapitulo()" ${temProximo ? '' : 'style="opacity:.35;pointer-events:none;"'}>
-        Próximo
-      </button>
-    </div>
-  `;
-}
+        <div class="chapter-end">
+          Fim do capítulo ${capituloAtual + 1}
+          <br>
+          ${temProximo ? '<button onclick="proximoCapitulo()">Ler próximo capítulo</button>' : '<span>Você chegou ao final desta história.</span>'}
+        </div>
+      </div>
+
+      <div class="reader-bottom-nav">
+        <button onclick="capituloAnterior()" ${temAnterior ? '' : 'style="opacity:.35;pointer-events:none;"'}>Anterior</button>
+        <span>Cap. ${capituloAtual + 1} de ${capitulosTexto.length} · salvo</span>
+        <button onclick="proximoCapitulo()" ${temProximo ? '' : 'style="opacity:.35;pointer-events:none;"'}>Próximo</button>
+      </div>`;
+  }
 
   function paginaAnterior() {
     capituloAnterior();
