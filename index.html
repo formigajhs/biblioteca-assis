@@ -148,8 +148,7 @@
       position: relative;
       border: 1px solid rgba(255,255,255,.14);
       background:
-        linear-gradient(90deg, rgba(0,0,0,.72), rgba(0,0,0,.18)),
-        url('https://images.unsplash.com/photo-1519682337058-a94d519337bc?q=80&w=1600&auto=format&fit=crop') center/cover;
+        linear-gradient(145deg, rgba(10,10,15,.92), rgba(22,22,35,.82));
       box-shadow: 0 30px 90px rgba(0,0,0,.44);
       display: flex;
       align-items: flex-end;
@@ -195,6 +194,61 @@
       line-height: 1.65;
       font-size: 1rem;
     }
+
+    .hero-slider {
+      margin-top: 28px;
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 8px;
+    }
+
+    .hero-slider::-webkit-scrollbar {
+      display: none;
+    }
+
+    .hero-book {
+      flex: 0 0 180px;
+      height: 240px;
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 18px 45px rgba(0,0,0,.35);
+      transition: .25s ease;
+    }
+
+    .hero-book:hover {
+      transform: translateY(-6px) scale(1.02);
+    }
+
+    .hero-book img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hero-book::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.88));
+    }
+
+    .hero-book span {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      z-index: 2;
+      color: white;
+      font-weight: 900;
+      font-size: .95rem;
+      line-height: 1.1;
+      text-shadow: 0 4px 12px rgba(0,0,0,.6);
+    }
+
 
     .tabs {
       display: flex;
@@ -1079,6 +1133,7 @@
         <div class="kicker">Biblioteca privada</div>
         <h2>Leia como se estivesse no seu próprio Kindle.</h2>
         <p>Contos em páginas, gibis em rolagem vertical e uma estante moderna feita para celular.</p>
+        <div class="hero-slider" id="heroSlider"></div>
       </div>
     </div>
   </section>
@@ -1263,6 +1318,7 @@
     }
 
     renderizar();
+    renderizarHero();
   }
 
   async function criarUrlAssinada(path) {
@@ -1698,6 +1754,36 @@
 
     box.style.display = 'block';
     box.innerHTML = avisos.length ? avisos.map(a => '• ' + a).join('<br>') : 'Nenhum problema básico encontrado. O corretor do navegador também pode sublinhar erros.';
+  }
+
+
+  function renderizarHero() {
+    const hero = document.getElementById('heroSlider');
+
+    if (!hero) return;
+
+    hero.innerHTML = '';
+
+    const lista = livros.slice(0, 10);
+
+    if (!lista.length) {
+      hero.innerHTML = `
+        <div class="hero-book">
+          <img src="https://images.unsplash.com/photo-1519682337058-a94d519337bc?q=80&w=1200&auto=format&fit=crop">
+          <span>Sua biblioteca começa aqui</span>
+        </div>
+      `;
+      return;
+    }
+
+    lista.forEach(livro => {
+      hero.innerHTML += `
+        <div class="hero-book" onclick="abrir(${livros.findIndex(l => l.id === livro.id)})">
+          <img src="${livro.capa_url || 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?q=80&w=1200&auto=format&fit=crop'}" alt="Capa">
+          <span>${livro.titulo}</span>
+        </div>
+      `;
+    });
   }
 
   iniciar();
