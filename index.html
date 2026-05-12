@@ -698,52 +698,46 @@
 
     .chapter-title {
   font-family: Playfair Display, serif;
-  font-size: clamp(2.2rem, 8vw, 3.8rem);
-  line-height: .92;
-  letter-spacing: -.06em;
+  font-size: clamp(2rem, 7vw, 3.4rem);
+  line-height: .95;
+  letter-spacing: -.05em;
 
-  margin: 22px 0 26px;
+  margin: 22px 0 28px;
+  padding: 24px 26px;
 
-  color: #fff !important;
+  color: #f8efe2 !important;
 
-  padding: 26px 28px;
-
-  border: none;
-
+  border: 1px solid rgba(255,255,255,.14);
   border-radius: 28px;
 
   background:
     linear-gradient(
       135deg,
-      #1a140f 0%,
-      #2d2218 45%,
-      #4a3726 100%
+      #3b2b1f 0%,
+      #5b4029 48%,
+      #8a673f 100%
     );
 
   box-shadow:
-    0 24px 60px rgba(60,40,20,.22),
-    inset 0 1px 0 rgba(255,255,255,.08);
+    0 22px 55px rgba(70,45,20,.24),
+    inset 0 1px 0 rgba(255,255,255,.18);
 
-  position: relative;
-
-  overflow: hidden;
+  text-shadow: 0 2px 8px rgba(0,0,0,.45);
 }
 .chapter-title::after {
   content: "";
-
   position: absolute;
-
   inset: 0;
-
   background:
     linear-gradient(
       120deg,
       rgba(255,255,255,.08),
       transparent 40%
     );
-
   pointer-events: none;
 }
+
+
 
     .reader.dark .chapter-title,
     .reader.dark .chapter-label,
