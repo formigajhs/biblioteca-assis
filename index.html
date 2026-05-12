@@ -1414,53 +1414,86 @@
   }
 
   function formatarTextoCapitulo(texto) {
-    const blocos = String(texto || '')
-      .split('
-')
-      .map(p => p.trim())
-      .filter(Boolean);
+  const blocos = String(texto || '')
+    .split('\n')
+    .map(p => p.trim())
+    .filter(Boolean);
 
-    return blocos.map(p => `<p>${escaparHTML(p)}</p>`).join('');
-  }
+  return blocos.map(p => `<p>${escaparHTML(p)}</p>`).join('');
+}
 
   function mostrarPagina() {
-    const area = document.getElementById('readerConteudo');
-    const capitulo = capitulosTexto[capituloAtual] || { titulo: 'Texto', texto: '' };
-    const opcoes = capitulosTexto.map((cap, i) => `
-      <option value="${i}" ${i === capituloAtual ? 'selected' : ''}>${escaparHTML(cap.titulo || 'Capítulo ' + (i + 1))}</option>
-    `).join('');
+  const area = document.getElementById('readerConteudo');
 
-    const textoCompleto = capitulo.texto || paginasTexto.join('
+  const capitulo = capitulosTexto[capituloAtual] || {
+    titulo: 'Texto',
+    texto: ''
+  };
 
-') || '';
-    const temProximo = capituloAtual < capitulosTexto.length - 1;
-    const temAnterior = capituloAtual > 0;
+  const opcoes = capitulosTexto.map((cap, i) => `
+    <option value="${i}" ${i === capituloAtual ? 'selected' : ''}>
+      ${escaparHTML(cap.titulo || 'Capítulo ' + (i + 1))}
+    </option>
+  `).join('');
 
-    area.innerHTML = `
-      <div class="chapter-top">
-        <div class="chapter-label">Capítulo ${capituloAtual + 1} de ${capitulosTexto.length}</div>
-        <select class="chapter-select" onchange="irParaCapitulo(this.value)">${opcoes}</select>
+  const textoCompleto = capitulo.texto || paginasTexto.join(' ');
+
+  const temProximo = capituloAtual < capitulosTexto.length - 1;
+  const temAnterior = capituloAtual > 0;
+
+  area.innerHTML = `
+    <div class="chapter-top">
+      <div class="chapter-label">
+        Capítulo ${capituloAtual + 1} de ${capitulosTexto.length}
       </div>
 
-      <h2 class="chapter-title">${escaparHTML(capitulo.titulo || 'Capítulo ' + (capituloAtual + 1))}</h2>
+      <select class="chapter-select" onchange="irParaCapitulo(this.value)">
+        ${opcoes}
+      </select>
+    </div>
 
-      <div class="reading-flow" style="font-size:${fonteSize}rem; font-family:${fonteAtual};">
-        ${formatarTextoCapitulo(textoCompleto)}
+    <h2 class="chapter-title">
+      ${escaparHTML(capitulo.titulo || 'Capítulo ' + (capituloAtual + 1))}
+    </h2>
 
-        <div class="chapter-end">
-          Fim do capítulo ${capituloAtual + 1}
-          <br>
-          ${temProximo ? '<button onclick="proximoCapitulo()">Ler próximo capítulo</button>' : '<span>Você chegou ao final desta história.</span>'}
-        </div>
+    <div class="reading-flow" style="font-size:${fonteSize}rem; font-family:${fonteAtual};">
+      ${formatarTextoCapitulo(textoCompleto)}
+
+      <div class="chapter-end">
+        Fim do capítulo ${capituloAtual + 1}
+        <br>
+
+        ${
+          temProximo
+            ? '<button onclick="proximoCapitulo()">Ler próximo capítulo</button>'
+            : '<span>Você chegou ao final desta história.</span>'
+        }
       </div>
+    </div>
 
-      <div class="reader-bottom-nav">
-        <button onclick="capituloAnterior()" ${temAnterior ? '' : 'style="opacity:.35;pointer-events:none;"'}>Anterior</button>
-        <span>Cap. ${capituloAtual + 1} de ${capitulosTexto.length} · salvo</span>
-        <button onclick="proximoCapitulo()" ${temProximo ? '' : 'style="opacity:.35;pointer-events:none;"'}>Próximo</button>
-      </div>`;
-  }
+    <div class="reader-bottom-nav">
+      <button
+        onclick="capituloAnterior()"
+        ${temAnterior ? '' : 'style="opacity:.35;pointer-events:none;"'}
+      >
+        Anterior
+      </button>
 
+      <span>
+        Cap. ${capituloAtual + 1} de ${capitulosTexto.length}
+        <br>
+        <small>salvo automaticamente</small>
+      </span>
+
+      <button
+        onclick="proximoCapitulo()"
+        ${temProximo ? '' : 'style="opacity:.35;pointer-events:none;"'}
+      >
+        Próximo
+      </button>
+    </div>
+  `;
+}
   function paginaAnterior() {
     capituloAnterior();
   }
