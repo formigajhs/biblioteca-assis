@@ -142,7 +142,7 @@
     }
 
     .hero-showcase {
-      min-height: 480px;
+      min-height: 430px;
       border-radius: 34px;
       overflow: hidden;
       position: relative;
@@ -176,47 +176,60 @@
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(90deg, rgba(0,0,0,.88) 0%, rgba(0,0,0,.55) 45%, rgba(0,0,0,.18) 100%),
-        linear-gradient(180deg, rgba(0,0,0,.05) 0%, rgba(0,0,0,.72) 100%);
+        linear-gradient(90deg, rgba(0,0,0,.90) 0%, rgba(0,0,0,.66) 42%, rgba(0,0,0,.18) 100%),
+        linear-gradient(180deg, rgba(0,0,0,.08) 0%, rgba(0,0,0,.76) 100%);
     }
 
     .hero-slide-content {
       position: relative;
       z-index: 2;
-      width: min(760px, 100%);
+      width: min(560px, 100%);
+    }
+
+    .hero-text-box {
+      width: min(540px, 100%);
+      padding: 24px;
+      border-radius: 28px;
+      background: rgba(0,0,0,.46);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 18px 60px rgba(0,0,0,.35);
     }
 
     .hero-kicker {
       display: inline-flex;
-      padding: 10px 14px;
+      padding: 9px 13px;
       border-radius: 999px;
       color: #05060a;
       background: linear-gradient(135deg, var(--accent), var(--warm));
       font-weight: 1000;
-      font-size: .82rem;
-      margin-bottom: 18px;
+      font-size: .78rem;
+      margin-bottom: 14px;
     }
 
-    .hero-slide h2 {
+    .hero-text-box h2 {
       font-family: Playfair Display, serif;
-      font-size: clamp(2.7rem, 9vw, 5.8rem);
-      line-height: .88;
-      letter-spacing: -.065em;
-      text-shadow: 0 18px 70px rgba(0,0,0,.72);
-      max-width: 760px;
+      font-size: clamp(2.4rem, 6vw, 5rem);
+      line-height: .90;
+      letter-spacing: -.06em;
+      margin-bottom: 14px;
+      color: #fff;
+      text-shadow: 0 12px 42px rgba(0,0,0,.62);
     }
 
-    .hero-slide p {
-      margin-top: 18px;
-      color: #e5e8f0;
-      max-width: 650px;
-      line-height: 1.55;
-      font-size: 1.03rem;
-      text-shadow: 0 8px 24px rgba(0,0,0,.7);
+    .hero-text-box p {
+      color: #e7e7ef;
+      line-height: 1.62;
+      font-size: 1rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-shadow: 0 8px 24px rgba(0,0,0,.55);
     }
 
     .hero-actions {
-      margin-top: 22px;
+      margin-top: 20px;
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
@@ -1139,10 +1152,12 @@
   
 
     @media (max-width: 720px) {
-      .hero-showcase { min-height: 520px; border-radius: 30px; }
-      .hero-slide { padding: 24px; align-items: flex-end; }
-      .hero-slide h2 { font-size: clamp(2.4rem, 13vw, 4.2rem); }
-      .hero-slide p { font-size: .94rem; }
+      .hero-showcase { min-height: 500px; border-radius: 30px; }
+      .hero-slide { padding: 22px; align-items: flex-end; }
+      .hero-slide-content { width: 100%; }
+      .hero-text-box { padding: 20px; border-radius: 24px; }
+      .hero-text-box h2 { font-size: clamp(2.3rem, 12vw, 4.1rem); }
+      .hero-text-box p { font-size: .94rem; -webkit-line-clamp: 5; }
       .hero-nav { left: 12px; right: 12px; }
       .hero-nav button { width: 40px; height: 40px; }
       .hero-actions button { width: 100%; }
@@ -1803,12 +1818,19 @@
   }
 
 
+  function cortarTexto(texto, limite = 190) {
+    const limpo = String(texto || '').trim().replace(/\s+/g, ' ');
+    if (limpo.length <= limite) return limpo;
+    return limpo.slice(0, limite).trim() + '...';
+  }
+
   function renderizarHero() {
     const hero = document.getElementById('heroSlider');
     if (!hero) return;
 
     const lista = livros.length ? livros.slice(0, 8) : [{
       titulo: 'Biblioteca Assis',
+      tipo: 'conto',
       sinopse: 'Adicione seus contos e gibis para montar sua vitrine de leitura.',
       capa_url: 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?q=80&w=1600&auto=format&fit=crop'
     }];
@@ -1817,63 +1839,27 @@
 
     const slides = lista.map((livro, i) => {
       const indexReal = livros.findIndex(l => l.id === livro.id);
-      const sinopse = (livro.sinopse || 'Abra para continuar lendo esta história.')
-  .slice(0, 220) + '...';
-      
+      const capa = livro.capa_url || 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?q=80&w=1600&auto=format&fit=crop';
+      const sinopse = cortarTexto(livro.sinopse || 'Abra para continuar lendo esta história.', 190);
+      const tipoLabel = livro.tipo === 'gibi' ? 'Gibi em destaque' : 'Conto em destaque';
       const botao = indexReal >= 0
         ? `<button class="hero-action-main" onclick="abrir(${indexReal})">Ler agora</button>`
         : `<button class="hero-action-main" onclick="abrirModal()">Adicionar história</button>`;
 
       return `
-        .hero-text-box{
-  width:min(520px,100%);
-  padding:24px;
-  border-radius:28px;
-
-  background:rgba(0,0,0,.42);
-  backdrop-filter:blur(10px);
-
-  border:1px solid rgba(255,255,255,.08);
-
-  box-shadow:
-    0 18px 60px rgba(0,0,0,.35);
-}
-
-.hero-text-box h2{
-  font-family:Playfair Display, serif;
-  font-size:clamp(2.4rem,6vw,5rem);
-  line-height:.92;
-  letter-spacing:-.06em;
-
-  margin-bottom:16px;
-
-  color:#fff;
-}
-
-.hero-text-box p{
-  color:#e7e7ef;
-  line-height:1.7;
-  font-size:1rem;
-
-  display:-webkit-box;
-  -webkit-line-clamp:5;
-  -webkit-box-orient:vertical;
-
-  overflow:hidden;
-}
-  <h2>${escaparHTML(livro.titulo || 'Biblioteca Assis')}</h2>
-
-  <p>
-    ${escaparHTML(sinopse)}
-  </p>
-
-  <div class="hero-actions">
-    ${botao}
-    <button class="hero-action-ghost" onclick="abrirModal()">
-      Adicionar novo
-    </button>
-  </div>
-</div>
+        <div class="hero-slide ${i === heroAtual ? 'active' : ''}" style="background-image:url('${capa}')">
+          <div class="hero-slide-content">
+            <div class="hero-text-box">
+              <div class="hero-kicker">${tipoLabel}</div>
+              <h2>${escaparHTML(livro.titulo || 'Biblioteca Assis')}</h2>
+              <p>${escaparHTML(sinopse)}</p>
+              <div class="hero-actions">
+                ${botao}
+                <button class="hero-action-ghost" onclick="abrirModal()">Adicionar novo</button>
+              </div>
+            </div>
+          </div>
+        </div>
       `;
     }).join('');
 
