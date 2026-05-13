@@ -793,17 +793,50 @@
     }
 
     .reading-flow {
-      min-height: 68vh;
-      padding: 6px 2px 90px;
+      position: relative;
+      overflow: hidden;
+
+      max-width: 920px;
+      margin: 28px auto 110px;
+      padding: clamp(28px, 6vw, 48px);
+
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,250,241,.92));
+
+      border: 1px solid rgba(80,60,35,.10);
+      border-radius: 30px;
+
+      box-shadow:
+        0 25px 80px rgba(80,60,35,.16),
+        inset 0 1px 0 rgba(255,255,255,.82);
+
+      color: #241b13;
+      line-height: 2;
       font-family: Literata, serif;
-      font-size: 1.24rem;
-      line-height: 1.95;
-      color: #17130f;
-      white-space: normal;
+    }
+
+    .reading-flow::before {
+      content: "";
+      position: absolute;
+      inset: 14px;
+      border-radius: 22px;
+      border: 1px solid rgba(80,60,35,.045);
+      pointer-events: none;
+    }
+
+    .reading-flow::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 18px;
+      background: linear-gradient(90deg, rgba(95,70,35,.10), transparent);
+      pointer-events: none;
     }
 
     .reading-flow p {
-      margin-bottom: 1.35em;
+      margin-bottom: 1.45em;
     }
 
     .chapter-end {
@@ -917,12 +950,20 @@
       border-color: rgba(255,255,255,.08);
     }
 
-    .reader.dark .kindle-page,
-    .reader.dark .reading-flow {
+    .reader.dark .kindle-page {
       background: transparent;
       border-color: transparent;
       color: #f7f7fb;
       box-shadow: none;
+    }
+
+    .reader.dark .reading-flow {
+      background: linear-gradient(180deg, rgba(28,31,45,.96), rgba(17,19,29,.96));
+      border-color: rgba(255,255,255,.10);
+      color: #f7f7fb;
+      box-shadow:
+        0 25px 80px rgba(0,0,0,.28),
+        inset 0 1px 0 rgba(255,255,255,.06);
     }
 
     .reader.dark .chapter-end {
@@ -1003,7 +1044,7 @@
       .reader-sinopse { font-size: .9rem; padding: 15px; margin: 12px 0 22px; }
       .chapter-top { margin-top: 24px; }
       .kindle-page, .reading-flow { font-size: 1.12rem; line-height: 1.92; }
-      .reading-flow { min-height: 70vh; padding-bottom: 105px; }
+      .reading-flow { min-height: 70vh; padding: 28px 22px 105px; margin-top: 22px; border-radius: 24px; }
       .chapter-top { padding: 10px; }
       .chapter-select { width: 100%; }
       .page-nav { gap: 8px; }
