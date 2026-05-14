@@ -1813,15 +1813,18 @@
     }
   }
 
-  function rolarParaTextoLeitor() {
-    const alvo = document.querySelector('.reading-flow') || document.getElementById('readerConteudo');
-    if (!alvo) return;
+ function rolarParaTextoLeitor() {
+  const alvo = document.querySelector('.reading-flow') || document.getElementById('readerConteudo');
 
-    alvo.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
-  }
+  if (!alvo) return;
+
+  const topo = alvo.getBoundingClientRect().top + window.scrollY - 95;
+
+  window.scrollTo({
+    top: topo,
+    behavior: 'smooth'
+  });
+}
 
   function irParaCapitulo(index) {
     capituloAtual = Number(index);
