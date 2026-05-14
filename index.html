@@ -509,6 +509,27 @@
       font-weight: 1000;
     }
 
+    .card-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .edit-btn {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 16px;
+      padding: 14px;
+      color: var(--text);
+      background: rgba(255,255,255,.09);
+      font-weight: 1000;
+    }
+
+    .card-actions .read-btn {
+      margin: 0;
+    }
+
     .empty {
       min-width: 100%;
       border-radius: 28px;
@@ -1470,8 +1491,8 @@
   <div class="modal-box">
     <div class="modal-head">
       <div>
-        <h3>Adicionar história</h3>
-        <p>Escolha capa, cole o texto ou selecione páginas do gibi direto do celular.</p>
+        <h3 id="modalTitulo">Adicionar história</h3>
+        <p id="modalSubtitulo">Escolha capa, cole o texto ou selecione páginas do gibi direto do celular.</p>
       </div>
       <button class="close" onclick="fecharModal()">×</button>
     </div>
@@ -1517,7 +1538,7 @@
       <button class="btn btn-ghost" onclick="verificarTextoSimples()" type="button">Verificar texto básico</button>
       <div id="resultadoVerificacao" class="check-box"></div>
 
-      <button class="save" onclick="adicionar()">Salvar na biblioteca</button>
+      <button id="botaoSalvar" class="save" onclick="adicionar()">Salvar na biblioteca</button>
     </div>
   </div>
 </section>
@@ -1541,6 +1562,8 @@
   let modoScrollCapitulo = true;
   let fonteAtual = 'Literata';
   let heroAtual = 0;
+  let livroEditandoId = null;
+  let capaEditandoPath = null;
 
   const auth = document.getElementById('auth');
   const home = document.getElementById('home');
@@ -1628,10 +1651,11 @@
 
     lista.forEach(livro => {
       const indexReal = livros.findIndex(l => l.id === livro.id);
+      const podeEditar = usuario && livro.user_id === usuario.id;
       const card = document.createElement('div');
       card.className = 'book-card';
       card.innerHTML = `
-        <button class="delete-btn" onclick="remover('${livro.id}')">×</button>
+        ${podeEditar ? `<button class="delete-btn" onclick="remover('${livro.id}')">×</button>` : ''}
         <div class="cover">
           <span class="badge">${livro.tipo === 'gibi' ? 'GIBI' : 'CONTO'}</span>
           <img src="${livro.capa_url || 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?q=80&w=1200&auto=format&fit=crop'}" alt="Capa">
@@ -1639,13 +1663,19 @@
         <div class="info">
           <h4>${livro.titulo}</h4>
           <p>${livro.sinopse || 'Sem sinopse.'}</p>
-          <button class="read-btn" onclick="abrir(${indexReal})">${livro.tipo === 'gibi' ? 'Abrir gibi' : 'Ler agora'}</button>
+          ${podeEditar
+            ? `<div class="card-actions">
+                <button class="read-btn" onclick="abrir(${indexReal})">${livro.tipo === 'gibi' ? 'Abrir gibi' : 'Ler agora'}</button>
+                <button class="edit-btn" onclick="abrirEditor(${indexReal})">Editar</button>
+              </div>`
+            : `<button class="read-btn" onclick="abrir(${indexReal})">${livro.tipo === 'gibi' ? 'Abrir gibi' : 'Ler agora'}</button>`
+          }
         </div>`;
       carousel.appendChild(card);
     });
   }
 
-  function filtrar(tipo) {
+    function filtrar(tipo) {
     filtro = tipo;
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     if (tipo === 'todos') document.getElementById('tabTodos').classList.add('active');
@@ -1783,13 +1813,23 @@
     }
   }
 
+  function rolarParaTextoLeitor() {
+    const alvo = document.querySelector('.reading-flow') || document.getElementById('readerConteudo');
+    if (!alvo) return;
+
+    alvo.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+
   function irParaCapitulo(index) {
     capituloAtual = Number(index);
     paginaAtual = 0;
     prepararPaginasDoCapitulo();
     salvarProgressoAtual();
     mostrarPagina();
-    window.scrollTo(0, 0);
+    rolarParaTextoLeitor();
   }
 
   function capituloAnterior() {
@@ -1799,7 +1839,7 @@
       prepararPaginasDoCapitulo();
       salvarProgressoAtual();
       mostrarPagina();
-      window.scrollTo(0, 0);
+      rolarParaTextoLeitor();
     }
   }
 
@@ -1810,7 +1850,7 @@
       prepararPaginasDoCapitulo();
       salvarProgressoAtual();
       mostrarPagina();
-      window.scrollTo(0, 0);
+      rolarParaTextoLeitor();
     }
   }
 
@@ -1909,8 +1949,51 @@
     window.scrollTo(0,0);
   }
 
-  function abrirModal() { document.getElementById('modal').classList.add('open'); }
-  function fecharModal() { document.getElementById('modal').classList.remove('open'); }
+  function abrirModal() {
+    livroEditandoId = null;
+    capaEditandoPath = null;
+
+    document.getElementById('modalTitulo').innerText = 'Adicionar história';
+    document.getElementById('modalSubtitulo').innerText = 'Escolha capa, cole o texto ou selecione páginas do gibi direto do celular.';
+    document.getElementById('botaoSalvar').innerText = 'Salvar na biblioteca';
+    document.getElementById('tipo').disabled = false;
+
+    document.getElementById('modal').classList.add('open');
+  }
+
+  function abrirEditor(index) {
+    const livro = livros[index];
+    if (!livro) return;
+
+    if (!usuario || livro.user_id !== usuario.id) {
+      alert('Só quem criou esta história pode editar.');
+      return;
+    }
+
+    livroEditandoId = livro.id;
+    capaEditandoPath = livro.capa_path || null;
+
+    document.getElementById('modalTitulo').innerText = 'Editar história';
+    document.getElementById('modalSubtitulo').innerText = 'Altere o título, sinopse, texto ou capa. Se não escolher nova capa, a atual será mantida.';
+    document.getElementById('botaoSalvar').innerText = 'Salvar alterações';
+
+    document.getElementById('tipo').value = livro.tipo || 'conto';
+    document.getElementById('tipo').disabled = true;
+    document.getElementById('titulo').value = livro.titulo || '';
+    document.getElementById('sinopse').value = livro.sinopse || '';
+    document.getElementById('texto').value = livro.texto || '';
+    document.getElementById('fontePadrao').value = livro.fonte || 'Literata';
+    document.getElementById('capa').value = '';
+    document.getElementById('paginas').value = '';
+
+    mudarTipo();
+    document.getElementById('modal').classList.add('open');
+  }
+
+  function fecharModal() {
+    document.getElementById('modal').classList.remove('open');
+    limparFormulario();
+  }
 
   function mudarTipo() {
     const tipo = document.getElementById('tipo').value;
@@ -1942,6 +2025,33 @@
       const paginasFiles = Array.from(document.getElementById('paginas').files || []);
 
       if (!titulo) throw new Error('Coloque o nome da história.');
+
+      if (livroEditandoId) {
+        const livroAtual = livros.find(l => l.id === livroEditandoId);
+        if (!livroAtual) throw new Error('Não encontrei esta história para editar.');
+        if (!usuario || livroAtual.user_id !== usuario.id) throw new Error('Só quem criou esta história pode editar.');
+
+        let capaPath = capaEditandoPath || livroAtual.capa_path || null;
+        if (capaFile) capaPath = await uploadArquivo(capaFile, 'capas');
+
+        const { error } = await client
+          .from('livros')
+          .update({
+            titulo,
+            sinopse,
+            texto: livroAtual.tipo === 'conto' ? texto : livroAtual.texto,
+            fonte: fontePadrao,
+            capa_path: capaPath
+          })
+          .eq('id', livroEditandoId);
+
+        if (error) throw error;
+
+        fecharModal();
+        await carregarLivros();
+        return;
+      }
+
       if (!capaFile) throw new Error('Escolha uma imagem de capa.');
 
       const capaPath = await uploadArquivo(capaFile, 'capas');
@@ -1973,7 +2083,6 @@
       }
 
       fecharModal();
-      limparFormulario();
       await carregarLivros();
     } catch (e) {
       alert(e.message || 'Erro ao salvar.');
@@ -1983,15 +2092,35 @@
   }
 
   function limparFormulario() {
+    livroEditandoId = null;
+    capaEditandoPath = null;
+
+    document.getElementById('tipo').disabled = false;
+    document.getElementById('tipo').value = 'conto';
     document.getElementById('titulo').value = '';
     document.getElementById('sinopse').value = '';
     document.getElementById('texto').value = '';
     document.getElementById('capa').value = '';
     document.getElementById('paginas').value = '';
+    document.getElementById('fontePadrao').value = 'Literata';
     document.getElementById('resultadoVerificacao').style.display = 'none';
+
+    document.getElementById('modalTitulo').innerText = 'Adicionar história';
+    document.getElementById('modalSubtitulo').innerText = 'Escolha capa, cole o texto ou selecione páginas do gibi direto do celular.';
+    document.getElementById('botaoSalvar').innerText = 'Salvar na biblioteca';
+
+    mudarTipo();
   }
 
   async function remover(id) {
+    const livro = livros.find(l => l.id === id);
+    if (!livro) return;
+
+    if (!usuario || livro.user_id !== usuario.id) {
+      alert('Só quem criou esta história pode apagar.');
+      return;
+    }
+
     const ok = confirm('Apagar esta história?');
     if (!ok) return;
     const { error } = await client.from('livros').delete().eq('id', id);
